@@ -1,3 +1,88 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "avatar-dev-ed",
+      "description": "Avatar for Dev Ed",
+      "imageUrl": "https://images.unsplash.com/photo-1624395213081-608f51284ddd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxtYW4lMjBmYWNlfGVufDB8fHx8MTc2Mzg5NDM2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man face"
+    },
+    {
+      "id": "avatar-fireship",
+      "description": "Avatar for Fireship",
+      "imageUrl": "https://images.unsplash.com/photo-1667523143908-b8ba833aaa55?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmaXJlJTIwc2t1bGx8ZW58MHx8fHwxNzYzOTAzMzcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fire skull"
+    },
+    {
+      "id": "avatar-wds",
+      "description": "Avatar for Web Dev Simplified",
+      "imageUrl": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtYW4lMjBzbWlsaW5nfGVufDB8fHx8MTc2Mzg1ODIzM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man smiling"
+    },
+    {
+      "id": "avatar-fcc",
+      "description": "Avatar for freeCodeCamp.org",
+      "imageUrl": "https://images.unsplash.com/photo-1543846035-f7b6fe51c641?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjYW1wZmlyZSUyMGxvZ298ZW58MHx8fHwxNzYzOTAzMzcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "campfire logo"
+    },
+    {
+      "id": "avatar-mkbhd",
+      "description": "Avatar for Marques Brownlee",
+      "imageUrl": "https://images.unsplash.com/photo-1590526599411-42bcd63d50fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtYW4lMjBzdW5nbGFzc2VzfGVufDB8fHx8MTc2MzkwMzM3MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man sunglasses"
+    },
+    {
+      "id": "thumbnail-nextjs-15-crash-course",
+      "description": "Thumbnail for Next.js 15 course",
+      "imageUrl": "https://images.unsplash.com/photo-1658274474930-bb27a64022c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjb2RlJTIwc2NyZWVufGVufDB8fHx8MTc2Mzg1NzA4OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "code screen"
+    },
+    {
+      "id": "thumbnail-react-in-100-seconds",
+      "description": "Thumbnail for React in 100 seconds",
+      "imageUrl": "https://images.unsplash.com/photo-1628760584600-6c31148991e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxsb2dvJTIwcmVhY3R8ZW58MHx8fHwxNzYzOTAzMzcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "logo react"
+    },
+    {
+      "id": "thumbnail-full-react-course-2024",
+      "description": "Thumbnail for Full React Course 2024",
+      "imageUrl": "https://images.unsplash.com/photo-1605106702842-01a887a31122?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxhYnN0cmFjdCUyMHNoYXBlc3xlbnwwfHx8fDE3NjM4NDk3NTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract shapes"
+    },
+    {
+      "id": "thumbnail-css-for-js-devs",
+      "description": "Thumbnail for CSS for JS Devs",
+      "imageUrl": "https://images.unsplash.com/photo-1454117096348-e4abbeba002c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxnZW9tZXRyaWMlMjBwYXR0ZXJufGVufDB8fHx8MTc2Mzc4OTM5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "geometric pattern"
+    },
+    {
+      "id": "thumbnail-the-perfect-api",
+      "description": "Thumbnail for Perfect API video",
+      "imageUrl": "https://images.unsplash.com/photo-1683322499436-f4383dd59f5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzZXJ2ZXIlMjByb29tfGVufDB8fHx8MTc2MzgyODE0Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "server room"
+    },
+    {
+      "id": "thumbnail-ai-phone-review",
+      "description": "Thumbnail for AI Phone Review",
+      "imageUrl": "https://images.unsplash.com/photo-1578840602674-bd891cb7ea5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8ZnV0dXJpc3RpYyUyMHBob25lfGVufDB8fHx8MTc2MzkwMzM3MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "futuristic phone"
+    },
+    {
+      "id": "thumbnail-genkit-tutorial",
+      "description": "Thumbnail for Genkit Tutorial",
+      "imageUrl": "https://images.unsplash.com/photo-1523961131990-5ea7c61b2107?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxhaSUyMGJyYWlufGVufDB8fHx8MTc2MzkwMzM3MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ai brain"
+    },
+    {
+      "id": "thumbnail-advanced-typescript",
+      "description": "Thumbnail for Advanced TypeScript",
+      "imageUrl": "https://images.unsplash.com/photo-1750816204148-5d02aff367cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxsb2dvJTIwdHlwZXNjcmlwdHxlbnwwfHx8fDE3NjM5MDMzNzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "logo typescript"
+    },
+    {
+      "id": "user-avatar",
+      "description": "Placeholder user avatar",
+      "imageUrl": "https://images.unsplash.com/photo-1544502062-f82887f03d1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBzaWxob3VldHRlfGVufDB8fHx8MTc2Mzg0MDgxOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person silhouette"
+    }
+  ]
 }
