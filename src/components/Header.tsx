@@ -1,30 +1,15 @@
 'use client'
 
-interface HeaderProps {
-  onMenuClick: () => void;
-}
-
-export default function Header({ onMenuClick }: HeaderProps) {
+export default function Header() {
   return (
-    <header className="bg-gray-900 border-b border-gray-700 p-4 sticky top-0 z-10">
+    <header className="bg-gray-900 border-b border-gray-700 p-4 sticky top-0 z-20">
       <div className="flex items-center justify-between">
-        {/* Left Section - Logo & Menu Button */}
-        <div className="flex items-center">
-          <button 
-            onClick={onMenuClick}
-            className="md:hidden mr-4 text-white p-2 rounded-full hover:bg-gray-800 transition-colors"
-            aria-label="Toggle menu"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <div className="flex items-center cursor-pointer">
-            <div className="w-8 h-8 bg-red-600 rounded-lg mr-2 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">M</span>
-            </div>
-            <h1 className="text-xl font-bold text-white hidden sm:block">MyVideoTube</h1>
+        {/* Left Section - Logo */}
+        <div className="flex items-center cursor-pointer">
+          <div className="w-8 h-8 bg-red-600 rounded-lg mr-2 flex items-center justify-center">
+            <span className="text-white font-bold text-sm">M</span>
           </div>
+          <h1 className="text-xl font-bold text-white hidden sm:block">MyVideoTube</h1>
         </div>
 
         {/* Center Section - Search Bar */}
