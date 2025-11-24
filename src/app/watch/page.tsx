@@ -54,7 +54,7 @@ function WatchPageContent() {
             }
         };
         fetchVideoAndPlaylistDetails();
-    }, [videoId, playlistIds]); // Depend on playlistIds to refetch if playlist changes
+    }, [videoId, playlistIds]);
 
     const handleVideoEnd: YouTubeProps['onEnd'] = (event) => {
         if (autoNext) {
@@ -82,22 +82,19 @@ function WatchPageContent() {
             return;
         }
 
-        if (document.pictureInPictureElement) {
+        // The correct way to request PiP for an iframe
+        if (videoElement !== document.pictureInPictureElement) {
+            try {
+                 await videoElement.requestPictureInPicture();
+            } catch(error) {
+                console.error("Failed to enter Picture-in-Picture mode:", error);
+            }
+        } else {
             try {
                 await document.exitPictureInPicture();
-            } catch (error) {
+            } catch(error) {
                  console.error("Failed to exit Picture-in-Picture mode:", error);
             }
-        } else if (document.pictureInPictureEnabled) {
-             try {
-                // The video element inside the iframe cannot be directly accessed.
-                // Requesting PiP on the iframe itself is the standard way.
-                await videoElement.requestPictureInPicture();
-             } catch (error) {
-                console.error("Failed to enter Picture-in-Picture mode:", error);
-             }
-        } else {
-             console.error("Picture-in-Picture is not enabled in this browser.");
         }
     };
 
@@ -127,8 +124,7 @@ function WatchPageContent() {
             autoplay: 1,
             rel: 0,
             modestbranding: 1,
-            // enablejsapi is needed for PiP
-            enablejsapi: 1,
+            enablejsapi: 1, // Crucial for JS API interaction
             origin: typeof window !== 'undefined' ? window.location.origin : '',
         },
     };
@@ -144,7 +140,7 @@ function WatchPageContent() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col lg:h-screen lg:overflow-y-hidden">
                  <div className="w-full lg:h-3/5 xl:h-3/4 flex-shrink-0 bg-black">
-                    <YouTube videoId={videoId} opts={opts} onReady={onPlayerReady} onEnd={handleVideoEnd} className="w-full h-full aspect-video lg:aspect-auto" />
+                    <YouTube videoId={videoId} opts={opts} onReady={onPlayerReady} onEnd={handleVideoEnd} className="w-full h-full aspect-video lg:aspect-auto" iframeClassName="w-full h-full" />
                 </div>
                 
                 <div className="p-4 lg:overflow-y-auto">
