@@ -93,9 +93,7 @@ function WatchPageContent() {
             autoplay: 1,
             rel: 0,
             modestbranding: 1,
-            // enablejsapi: 1 is needed for some player interactions, good to have
             enablejsapi: 1, 
-            // This helps if your app is hosted on a different domain than where it's embedded
             origin: typeof window !== 'undefined' ? window.location.origin : '',
         },
     };
@@ -114,7 +112,7 @@ function WatchPageContent() {
                     <YouTube 
                         videoId={videoId} 
                         opts={opts} 
-                        onEnd={handleVideoEnd} 
+                        onEnd={handleVideoEnd}
                         className="w-full h-full aspect-video lg:aspect-auto" 
                         iframeClassName="w-full h-full" 
                     />
