@@ -13,7 +13,7 @@ export default function VideoCard({ video }: VideoCardProps) {
 
   return (
     <div className="flex flex-col">
-      <Link href={`https://www.youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer" className="group">
+      <Link href={`/watch?v=${video.id}`} className="group">
         <div className="relative aspect-video rounded-xl overflow-hidden">
             <Image
               src={video.thumbnailUrl}
@@ -37,7 +37,7 @@ export default function VideoCard({ video }: VideoCardProps) {
         )}
         <div className="flex-1">
           <h3 className="text-white font-semibold text-base leading-tight line-clamp-2">
-            <Link href={`https://www.youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer">{video.title}</Link>
+            <Link href={`/watch?v=${video.id}`}>{video.title}</Link>
           </h3>
           <p className="text-gray-400 text-sm mt-1">{video.channelName}</p>
           <div className="text-gray-400 text-sm">

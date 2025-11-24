@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from "react";
+import { Search, Video, Bell, Menu, X } from 'lucide-react';
 
 interface HeaderProps {
     onSearch: (query: string) => void;
@@ -8,20 +9,27 @@ interface HeaderProps {
 
 export default function Header({ onSearch }: HeaderProps) {
   const [query, setQuery] = useState('');
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
       onSearch(query.trim());
+      setIsSearchVisible(false); // Hide search bar after search on mobile
     }
   };
 
+  const toggleSearch = () => {
+    setIsSearchVisible(!isSearchVisible);
+  }
+
   return (
-    <header className="bg-gray-900 border-b border-gray-700 p-4 sticky top-0 z-20">
+    <header className="bg-black border-b border-gray-800 p-2 sm:p-4 sticky top-0 z-20">
       <div className="flex items-center justify-between">
-        {/* Left Section - Logo */}
-        <div className="flex items-center cursor-pointer">
-          <div className="w-8 h-8 bg-red-600 rounded-lg mr-2 flex items-center justify-center flex-shrink-0">
+
+        {/* Left Section: Logo - shows on non-search view on mobile */}
+        <div className={`flex items-center cursor-pointer transition-opacity duration-300 ${isSearchVisible ? 'opacity-0 pointer-events-none sm:opacity-100 sm:pointer-events-auto' : 'opacity-100'}`}>
+          <div className="w-8 h-8 bg-red-600 rounded-full mr-2 flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-sm">M</span>
           </div>
           <div className="hidden sm:flex sm:flex-col">
@@ -30,36 +38,38 @@ export default function Header({ onSearch }: HeaderProps) {
           </div>
         </div>
 
-        {/* Center Section - Search Bar */}
-        <div className="flex-1 max-w-2xl mx-4">
+        {/* Center Section: Search Bar */}
+        <div className={`flex-1 absolute sm:static left-0 right-0 px-2 sm:px-4 transition-all duration-300 ${isSearchVisible ? 'top-1/2 -translate-y-1/2 opacity-100' : 'top-[-100%] opacity-0 sm:opacity-100 sm:top-auto sm:translate-y-0'}`}>
           <form onSubmit={handleSearch} className="relative">
             <input
               type="text"
               placeholder="Cari video..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-red-600 border border-gray-700"
+              className="w-full bg-gray-800 text-white pl-4 pr-10 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-red-600 border border-gray-700"
             />
             <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <Search className="w-5 h-5" />
             </button>
           </form>
         </div>
 
-        {/* Right Section - Icons */}
-        <div className="flex items-center space-x-2 md:space-x-4">
+        {/* Right Section: Icons */}
+        <div className="flex items-center space-x-1 sm:space-x-2">
+           <button onClick={toggleSearch} className="sm:hidden text-white p-2 rounded-full hover:bg-gray-800 transition-colors" aria-label="Search">
+             {isSearchVisible ? <X className="w-5 h-5"/> : <Search className="w-5 h-5"/>}
+           </button>
           <button className="text-white p-2 rounded-full hover:bg-gray-800 transition-colors" aria-label="Upload">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg>
+            <Video className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           <button className="text-white p-2 rounded-full hover:bg-gray-800 transition-colors" aria-label="Notifications">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
+            <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
-          <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-500 transition-colors">
+          <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-500 transition-colors flex-shrink-0">
             <span className="text-white text-sm font-medium">D</span>
           </div>
         </div>
+
       </div>
     </header>
   );
