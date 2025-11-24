@@ -74,15 +74,30 @@ function WatchPageContent() {
     };
     
     const togglePictureInPicture = async () => {
-        const videoElement = await player?.getIframe();
+        if (!player) return;
+        const videoElement = player.getIframe();
+    
+        if (!videoElement) {
+            console.error('Could not get video iframe.');
+            return;
+        }
+
         if (document.pictureInPictureElement) {
-            document.exitPictureInPicture();
-        } else if (videoElement && document.pictureInPictureEnabled) {
+            try {
+                await document.exitPictureInPicture();
+            } catch (error) {
+                 console.error("Failed to exit Picture-in-Picture mode:", error);
+            }
+        } else if (document.pictureInPictureEnabled) {
              try {
+                // The video element inside the iframe cannot be directly accessed.
+                // Requesting PiP on the iframe itself is the standard way.
                 await videoElement.requestPictureInPicture();
              } catch (error) {
                 console.error("Failed to enter Picture-in-Picture mode:", error);
              }
+        } else {
+             console.error("Picture-in-Picture is not enabled in this browser.");
         }
     };
 
@@ -114,6 +129,7 @@ function WatchPageContent() {
             modestbranding: 1,
             // enablejsapi is needed for PiP
             enablejsapi: 1,
+            origin: typeof window !== 'undefined' ? window.location.origin : '',
         },
     };
 
