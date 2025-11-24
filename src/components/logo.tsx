@@ -19,7 +19,10 @@ export function Logo() {
           fill="currentColor"
         />
       </svg>
-      <span className="text-xl font-bold tracking-tighter">MyVideoTube</span>
+      <div>
+        <span className="text-xl font-bold tracking-tighter">MyVideoTube</span>
+        <p className="text-xs text-muted-foreground">Created By. DimzM01</p>
+      </div>
     </div>
   );
 }
