@@ -22,7 +22,6 @@ function WatchPageContent() {
     const [playlistDetails, setPlaylistDetails] = useState<Video[]>([]);
     const [autoNext, setAutoNext] = useState(true);
     const [loading, setLoading] = useState(true);
-    const [player, setPlayer] = useState<any>(null);
 
     const currentIndex = playlist.findIndex(id => id === videoId);
 
@@ -62,37 +61,12 @@ function WatchPageContent() {
         }
     };
     
-    const onPlayerReady: YouTubeProps['onReady'] = (event) => {
-        setPlayer(event.target);
-    };
-
     const playNextVideo = () => {
         if (currentIndex > -1 && currentIndex < playlist.length - 1) {
             const nextVideoId = playlist[currentIndex + 1];
             router.push(`/watch?v=${nextVideoId}&playlist=${playlist.join(',')}`);
         }
     };
-    
-    const togglePictureInPicture = async () => {
-        if (!player) return;
-        const videoElement = player.getIframe();
-    
-        if (!videoElement) {
-            console.error('Could not get video iframe.');
-            return;
-        }
-
-        try {
-            if (videoElement !== document.pictureInPictureElement) {
-                 await videoElement.requestPictureInPicture();
-            } else {
-                await document.exitPictureInPicture();
-            }
-        } catch(error) {
-            console.error("Failed to toggle Picture-in-Picture mode:", error);
-        }
-    };
-
 
     if (loading) {
         return <div className="bg-black text-white h-screen flex items-center justify-center">Loading video...</div>
@@ -121,6 +95,8 @@ function WatchPageContent() {
             modestbranding: 1,
             enablejsapi: 1,
             origin: typeof window !== 'undefined' ? window.location.origin : '',
+            // Mengaktifkan picture-in-picture secara eksplisit
+            pictureInPicture: 1,
         },
     };
 
@@ -135,7 +111,7 @@ function WatchPageContent() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col lg:h-screen lg:overflow-y-hidden">
                  <div className="w-full lg:h-3/5 xl:h-3/4 flex-shrink-0 bg-black">
-                    <YouTube videoId={videoId} opts={opts} onReady={onPlayerReady} onEnd={handleVideoEnd} className="w-full h-full aspect-video lg:aspect-auto" iframeClassName="w-full h-full" />
+                    <YouTube videoId={videoId} opts={opts} onEnd={handleVideoEnd} className="w-full h-full aspect-video lg:aspect-auto" iframeClassName="w-full h-full" />
                 </div>
                 
                 <div className="p-4 lg:overflow-y-auto">
@@ -151,10 +127,6 @@ function WatchPageContent() {
                     <div className="flex flex-wrap items-center justify-between text-gray-400 gap-4">
                         <p>{videoDetails?.channelName}</p>
                         <div className="flex items-center space-x-4">
-                           <button onClick={togglePictureInPicture} className="flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors p-1 rounded-md" aria-label="Toggle Picture in Picture">
-                               <PictureInPicture2 size={20} />
-                               <span>Minimalkan</span>
-                           </button>
                            <div className="flex items-center space-x-2">
                                <Label htmlFor="auto-next" className="text-sm">Auto-Next</Label>
                                <Switch
