@@ -15,21 +15,12 @@ export default function Home() {
     : videos.filter(video => video.category === activeCategory);
 
   return (
-    <div className="flex flex-col h-screen bg-black">
+    <div className="bg-black min-h-screen">
       {/* Header */}
       <Header />
       
-      {/* Welcome Section & Category Nav */}
+      {/* Category Nav */}
       <div className="p-4 md:p-6 pb-4">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">
-              MYVIDEOTUBE
-            </h1>
-            <p className="text-gray-400 text-sm">Created By. DimzM01</p>
-          </div>
-        </div>
-        
         {/* Category Buttons */}
         <div className="flex space-x-4 overflow-x-auto pb-2">
           {categories.map((category) => (
@@ -49,7 +40,7 @@ export default function Home() {
       </div>
       
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-6 pt-0">
+      <main className="p-4 md:p-6 pt-0">
         {/* Video Grid */}
         <VideoGrid videos={filteredVideos} />
       </main>
