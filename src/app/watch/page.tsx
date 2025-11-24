@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, PictureInPicture2 } from 'lucide-react';
 import { Suspense, useState, useEffect } from 'react';
 import YouTube, { YouTubeProps } from 'react-youtube';
 import type { Video } from '@/lib/data';
@@ -22,6 +22,7 @@ function WatchPageContent() {
     const [playlistDetails, setPlaylistDetails] = useState<Video[]>([]);
     const [autoNext, setAutoNext] = useState(true);
     const [loading, setLoading] = useState(true);
+    const [player, setPlayer] = useState<any>(null);
 
     const currentIndex = playlist.findIndex(id => id === videoId);
 
@@ -60,6 +61,10 @@ function WatchPageContent() {
             playNextVideo();
         }
     };
+    
+    const onPlayerReady: YouTubeProps['onReady'] = (event) => {
+        setPlayer(event.target);
+    };
 
     const playNextVideo = () => {
         if (currentIndex > -1 && currentIndex < playlist.length - 1) {
@@ -67,6 +72,20 @@ function WatchPageContent() {
             router.push(`/watch?v=${nextVideoId}&playlist=${playlist.join(',')}`);
         }
     };
+    
+    const togglePictureInPicture = async () => {
+        const videoElement = await player?.getIframe();
+        if (document.pictureInPictureElement) {
+            document.exitPictureInPicture();
+        } else if (videoElement && document.pictureInPictureEnabled) {
+             try {
+                await videoElement.requestPictureInPicture();
+             } catch (error) {
+                console.error("Failed to enter Picture-in-Picture mode:", error);
+             }
+        }
+    };
+
 
     if (loading) {
         return <div className="bg-black text-white h-screen flex items-center justify-center">Loading video...</div>
@@ -93,13 +112,11 @@ function WatchPageContent() {
             autoplay: 1,
             rel: 0,
             modestbranding: 1,
+            // enablejsapi is needed for PiP
+            enablejsapi: 1,
         },
     };
 
-    const upcomingVideos = playlistDetails.length > 0 && currentIndex > -1 
-        ? playlistDetails.slice(currentIndex + 1) 
-        : [];
-    
     // Create a map for quick lookups to preserve order
     const videoDetailsMap = new Map(playlistDetails.map(v => [v.id, v]));
     const orderedPlaylistVideos = playlist
@@ -111,28 +128,34 @@ function WatchPageContent() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col lg:h-screen lg:overflow-y-hidden">
                  <div className="w-full lg:h-3/5 xl:h-3/4 flex-shrink-0 bg-black">
-                    <YouTube videoId={videoId} opts={opts} onEnd={handleVideoEnd} className="w-full h-full aspect-video lg:aspect-auto" />
+                    <YouTube videoId={videoId} opts={opts} onReady={onPlayerReady} onEnd={handleVideoEnd} className="w-full h-full aspect-video lg:aspect-auto" />
                 </div>
                 
                 <div className="p-4 lg:overflow-y-auto">
                      <button
-                        onClick={() => router.back()}
+                        onClick={() => router.push('/')}
                         className="flex lg:hidden items-center gap-2 text-white hover:text-gray-300 transition-colors mb-4"
                     >
                         <ArrowLeft size={20} />
-                        <span>Back</span>
+                        <span>Kembali</span>
                     </button>
 
                     <h1 className="text-xl md:text-2xl font-bold mb-2">{videoDetails?.title}</h1>
-                    <div className="flex items-center justify-between text-gray-400">
+                    <div className="flex flex-wrap items-center justify-between text-gray-400 gap-4">
                         <p>{videoDetails?.channelName}</p>
-                        <div className="flex items-center space-x-2">
-                           <Label htmlFor="auto-next" className="text-sm">Auto-Next</Label>
-                           <Switch
-                                id="auto-next"
-                                checked={autoNext}
-                                onCheckedChange={setAutoNext}
-                            />
+                        <div className="flex items-center space-x-4">
+                           <button onClick={togglePictureInPicture} className="flex items-center gap-2 text-sm text-white hover:text-gray-300 transition-colors p-1 rounded-md" aria-label="Toggle Picture in Picture">
+                               <PictureInPicture2 size={20} />
+                               <span>Minimalkan</span>
+                           </button>
+                           <div className="flex items-center space-x-2">
+                               <Label htmlFor="auto-next" className="text-sm">Auto-Next</Label>
+                               <Switch
+                                    id="auto-next"
+                                    checked={autoNext}
+                                    onCheckedChange={setAutoNext}
+                                />
+                           </div>
                         </div>
                     </div>
                      <div className="flex items-center gap-2 mt-1">
@@ -149,13 +172,13 @@ function WatchPageContent() {
             {/* Playlist Sidebar */}
             <div className="lg:w-96 lg:border-l lg:border-gray-800 flex-shrink-0 lg:h-screen lg:flex lg:flex-col">
                 <div className="p-4 border-b border-t lg:border-t-0 border-gray-800 flex justify-between items-center flex-shrink-0">
-                    <h2 className="font-bold text-lg">Next up</h2>
+                    <h2 className="font-bold text-lg">Berikutnya</h2>
                      <button
-                        onClick={() => router.back()}
+                        onClick={() => router.push('/')}
                         className="hidden lg:flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
                     >
                         <ArrowLeft size={20} />
-                        <span>Back</span>
+                        <span>Kembali</span>
                     </button>
                 </div>
                 <div className="lg:flex-1 lg:overflow-y-auto">
