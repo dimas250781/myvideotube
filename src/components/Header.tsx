@@ -2,14 +2,17 @@
 
 export default function Header() {
   return (
-    <header className="bg-gray-900 border-b border-gray-700 p-4 sticky top-0 z-20">
+    <header className="bg-gray-900 border-b border-gray-700 p-4">
       <div className="flex items-center justify-between">
         {/* Left Section - Logo */}
         <div className="flex items-center cursor-pointer">
-          <div className="w-8 h-8 bg-red-600 rounded-lg mr-2 flex items-center justify-center">
+          <div className="w-8 h-8 bg-red-600 rounded-lg mr-2 flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-sm">M</span>
           </div>
-          <h1 className="text-xl font-bold text-white hidden sm:block">MyVideoTube</h1>
+          <div className="hidden sm:flex sm:flex-col">
+            <h1 className="text-xl font-bold text-white">MyVideoTube</h1>
+            <p className="text-xs text-gray-400">Created By. DimzM01</p>
+          </div>
         </div>
 
         {/* Center Section - Search Bar */}
