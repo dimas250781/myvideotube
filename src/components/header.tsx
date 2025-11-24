@@ -5,7 +5,6 @@ import { Bell, Upload, Mic } from 'lucide-react';
 import { Button } from './ui/button';
 import { Logo } from './logo';
 import { SearchBar } from './search-bar';
-import { SidebarTrigger } from './ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import {
   DropdownMenu,
@@ -21,14 +20,11 @@ const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
 
 export function AppHeader() {
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between gap-2 md:gap-4 h-16 px-4 border-b bg-background">
-      <div className="flex items-center gap-2">
-        <SidebarTrigger className="md:hidden" />
-        <div className="hidden md:block">
-          <Link href="/">
-            <Logo />
-          </Link>
-        </div>
+    <header className="sticky top-0 z-20 flex items-center justify-between gap-2 md:gap-4 h-16 px-4 border-b bg-background">
+      <div className="flex items-center gap-4">
+        <Link href="/">
+          <Logo />
+        </Link>
       </div>
 
       <div className="flex-1 flex justify-center px-4">

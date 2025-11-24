@@ -20,7 +20,7 @@ export function VideoCard({ video }: VideoCardProps) {
 
   return (
     <div className="group">
-      <Link href={`/watch/${video.id}`}>
+      <Link href={`/watch/${video.id}`} className="block">
         <div className="relative aspect-video overflow-hidden rounded-xl">
           <Image
             src={thumbnail.imageUrl}
