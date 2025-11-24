@@ -1,8 +1,8 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft, PictureInPicture2 } from 'lucide-react';
-import { Suspense, useState, useEffect } from 'react';
+import { ArrowLeft } from 'lucide-react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import YouTube, { YouTubeProps } from 'react-youtube';
 import type { Video } from '@/lib/data';
 import Link from 'next/link';
@@ -93,10 +93,10 @@ function WatchPageContent() {
             autoplay: 1,
             rel: 0,
             modestbranding: 1,
-            enablejsapi: 1,
+            // enablejsapi: 1 is needed for some player interactions, good to have
+            enablejsapi: 1, 
+            // This helps if your app is hosted on a different domain than where it's embedded
             origin: typeof window !== 'undefined' ? window.location.origin : '',
-            // Mengaktifkan picture-in-picture secara eksplisit
-            pictureInPicture: 1,
         },
     };
 
@@ -110,8 +110,14 @@ function WatchPageContent() {
         <div className="bg-black text-white min-h-screen flex flex-col lg:flex-row">
             {/* Main Content */}
             <div className="flex-1 flex flex-col lg:h-screen lg:overflow-y-hidden">
-                 <div className="w-full lg:h-3/5 xl:h-3/4 flex-shrink-0 bg-black">
-                    <YouTube videoId={videoId} opts={opts} onEnd={handleVideoEnd} className="w-full h-full aspect-video lg:aspect-auto" iframeClassName="w-full h-full" />
+                 <div className="w-full lg:h-3/5 xl:h-3/4 flex-shrink-0 bg-black relative">
+                    <YouTube 
+                        videoId={videoId} 
+                        opts={opts} 
+                        onEnd={handleVideoEnd} 
+                        className="w-full h-full aspect-video lg:aspect-auto" 
+                        iframeClassName="w-full h-full" 
+                    />
                 </div>
                 
                 <div className="p-4 lg:overflow-y-auto">
@@ -161,6 +167,7 @@ function WatchPageContent() {
                     </button>
                 </div>
                 <div className="lg:flex-1 lg:overflow-y-auto">
+                    {/* Show all upcoming videos in the playlist */}
                     {orderedPlaylistVideos.slice(currentIndex + 1).map(video => (
                         <Link key={video.id} href={`/watch?v=${video.id}&playlist=${playlist.join(',')}`} className="flex gap-3 p-3 hover:bg-gray-800 transition-colors">
                             <div className="relative aspect-video w-32 flex-shrink-0">
