@@ -5,12 +5,12 @@ import Header from '@/components/Header'
 import VideoGrid from '@/components/video-grid'
 import { videos } from '@/lib/data';
 
-const categories = ["Semua", "Beranda", "Musik", "Karaoke", "Berita", "Live", "Kuliner", "Komedi", "Film", "Horor", "Traveling", "Hobby"];
+const categories = ["Beranda", "Musik", "Karaoke", "Berita", "Live", "Kuliner", "Komedi", "Film", "Horor", "Traveling", "Hobby"];
 
 export default function Home() {
-  const [activeCategory, setActiveCategory] = useState('Semua');
+  const [activeCategory, setActiveCategory] = useState('Beranda');
 
-  const filteredVideos = activeCategory === 'Semua' 
+  const filteredVideos = activeCategory === 'Beranda' 
     ? videos 
     : videos.filter(video => video.category === activeCategory);
 
