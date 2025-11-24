@@ -2,7 +2,15 @@ import { NextResponse } from 'next/server';
 import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
 
-const apiKeys = (process.env.YOUTUBE_API_KEYS || '').split(',');
+// Read individual API keys from environment variables and filter out any that are not set
+const apiKeys = [
+  process.env.YOUTUBE_API_KEY_1,
+  process.env.YOUTUBE_API_KEY_2,
+  process.env.YOUTUBE_API_KEY_3,
+  process.env.YOUTUBE_API_KEY_4,
+  process.env.YOUTUBE_API_KEY_5,
+].filter((key): key is string => !!key);
+
 let currentKeyIndex = 0;
 
 const YOUTUBE_VIDEO_CATEGORIES: { [key: string]: string } = {
@@ -42,6 +50,10 @@ const formatViews = (views: string) => {
 
 
 async function fetchWithRetry(url: string) {
+  if (apiKeys.length === 0) {
+    throw new Error('No YouTube API keys configured.');
+  }
+
   for (let i = 0; i < apiKeys.length; i++) {
     const apiKey = apiKeys[currentKeyIndex];
     const fullUrl = `${url}&key=${apiKey}`;
@@ -74,7 +86,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category') || 'Beranda';
   
-  if (!apiKeys.length || !apiKeys[0]) {
+  if (apiKeys.length === 0) {
     return NextResponse.json({ message: 'YouTube API key not configured' }, { status: 500 });
   }
 
@@ -93,24 +105,31 @@ export async function GET(request: Request) {
       queryParams = `part=snippet&q=${searchQuery}&regionCode=${regionCode}&maxResults=${maxResults}&type=video`;
     }
 
-    const videosData = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/videos?${queryParams}`);
-    const searchData = queryParams.includes('&q=') ? await fetchWithRetry(`https://www.googleapis.com/youtube/v3/search?${queryParams}`) : null;
-
-    const items = searchData ? searchData.items : videosData.items;
+    const itemsData = queryParams.includes('&q=') 
+      ? await fetchWithRetry(`https://www.googleapis.com/youtube/v3/search?${queryParams}`) 
+      : await fetchWithRetry(`https://www.googleapis.com/youtube/v3/videos?${queryParams}`);
+    
+    const items = itemsData.items;
     
     // If we did a search, we need to fetch video details separately to get duration and stats
     let finalItems = items;
-    if (searchData) {
+    if (queryParams.includes('&q=')) {
         const videoIds = items.map((item: any) => item.id.videoId).join(',');
-        const detailsData = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=${videoIds}`);
-        
-        const detailsMap = new Map(detailsData.items.map((item: any) => [item.id, item]));
-        finalItems = items.map((item: any) => ({ ...item, ...detailsMap.get(item.id.videoId) }));
+        if (videoIds) {
+            const detailsData = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=${videoIds}`);
+            
+            const detailsMap = new Map(detailsData.items.map((item: any) => [item.id, item]));
+            finalItems = items.map((item: any) => ({ ...item, ...detailsMap.get(item.id.videoId) }));
+        }
     }
 
-    const channelIds = [...new Set(finalItems.map((item: any) => item.snippet.channelId))].join(',');
-    const channelsData = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelIds}`);
-    const channelAvatars = new Map(channelsData.items.map((channel: any) => [channel.id, channel.snippet.thumbnails.default.url]));
+    const channelIds = [...new Set(finalItems.map((item: any) => item.snippet.channelId).filter(Boolean))].join(',');
+    let channelAvatars = new Map();
+    if(channelIds) {
+        const channelsData = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelIds}`);
+        channelAvatars = new Map(channelsData.items.map((channel: any) => [channel.id, channel.snippet.thumbnails.default.url]));
+    }
+
 
     const formattedVideos = finalItems.map((item: any) => ({
       id: typeof item.id === 'object' ? item.id.videoId : item.id,
