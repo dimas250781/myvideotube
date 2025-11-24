@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft, MonitorPlay, ListVideo } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Suspense, useState, useEffect } from 'react';
 import YouTube, { YouTubeProps } from 'react-youtube';
 import type { Video } from '@/lib/data';
@@ -21,12 +21,18 @@ function WatchPageContent() {
     const [videoDetails, setVideoDetails] = useState<Video | null>(null);
     const [playlistDetails, setPlaylistDetails] = useState<Video[]>([]);
     const [autoNext, setAutoNext] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     const currentIndex = playlist.findIndex(id => id === videoId);
 
     useEffect(() => {
         const fetchVideoAndPlaylistDetails = async () => {
-            if (!videoId) return;
+            if (!videoId) {
+                setLoading(false);
+                return;
+            };
+            
+            setLoading(true);
 
             try {
                 // Fetch current video details
@@ -38,14 +44,16 @@ function WatchPageContent() {
                 if (playlist.length > 0) {
                     const resPlaylist = await fetch(`/api/youtube/details?id=${playlist.join(',')}`);
                     const playlistData = await resPlaylist.json();
-                    setPlaylistDetails(Array.isArray(playlistData) ? playlistData : [playlistData]);
+                    setPlaylistDetails(Array.isArray(playlistData) ? playlistData : (playlistData ? [playlistData] : []));
                 }
             } catch (error) {
                 console.error("Failed to fetch video details:", error);
+            } finally {
+                setLoading(false);
             }
         };
         fetchVideoAndPlaylistDetails();
-    }, [videoId, playlist.join(',')]);
+    }, [videoId, playlistIds]); // Depend on playlistIds to refetch if playlist changes
 
     const handleVideoEnd: YouTubeProps['onEnd'] = (event) => {
         if (autoNext) {
@@ -54,14 +62,17 @@ function WatchPageContent() {
     };
 
     const playNextVideo = () => {
-        if (currentIndex < playlist.length - 1) {
+        if (currentIndex > -1 && currentIndex < playlist.length - 1) {
             const nextVideoId = playlist[currentIndex + 1];
             router.push(`/watch?v=${nextVideoId}&playlist=${playlist.join(',')}`);
         }
     };
 
+    if (loading) {
+        return <div className="bg-black text-white h-screen flex items-center justify-center">Loading video...</div>
+    }
+
     if (!videoId) {
-        // This part remains the same as your original code
         return (
             <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
                 <p>Video not found.</p>
@@ -85,17 +96,25 @@ function WatchPageContent() {
         },
     };
 
-    const nextVideo = playlistDetails.find(v => v.id === playlist[currentIndex + 1]);
+    const upcomingVideos = playlistDetails.length > 0 && currentIndex > -1 
+        ? playlistDetails.slice(currentIndex + 1) 
+        : [];
+    
+    // Create a map for quick lookups to preserve order
+    const videoDetailsMap = new Map(playlistDetails.map(v => [v.id, v]));
+    const orderedPlaylistVideos = playlist
+      .map(id => videoDetailsMap.get(id))
+      .filter((v): v is Video => !!v);
 
     return (
         <div className="bg-black text-white min-h-screen flex flex-col lg:flex-row">
             {/* Main Content */}
-            <div className="flex-1 flex flex-col">
-                <div className="w-full aspect-video">
-                    <YouTube videoId={videoId} opts={opts} onEnd={handleVideoEnd} className="w-full h-full" />
+            <div className="flex-1 flex flex-col lg:h-screen lg:overflow-y-hidden">
+                 <div className="w-full lg:h-3/5 xl:h-3/4 flex-shrink-0 bg-black">
+                    <YouTube videoId={videoId} opts={opts} onEnd={handleVideoEnd} className="w-full h-full aspect-video lg:aspect-auto" />
                 </div>
                 
-                <div className="p-4">
+                <div className="p-4 lg:overflow-y-auto">
                      <button
                         onClick={() => router.back()}
                         className="flex lg:hidden items-center gap-2 text-white hover:text-gray-300 transition-colors mb-4"
@@ -121,12 +140,15 @@ function WatchPageContent() {
                         <span className="text-sm">•</span>
                         <p className="text-sm">{videoDetails?.uploadedAt}</p>
                     </div>
+                    <div className="mt-4 border-t border-gray-800 pt-4">
+                        <p className="text-sm whitespace-pre-wrap">{videoDetails?.description}</p>
+                    </div>
                 </div>
             </div>
 
             {/* Playlist Sidebar */}
-            <div className="lg:w-96 lg:border-l lg:border-gray-800 flex-shrink-0">
-                <div className="p-4 border-b border-t lg:border-t-0 border-gray-800 flex justify-between items-center">
+            <div className="lg:w-96 lg:border-l lg:border-gray-800 flex-shrink-0 lg:h-screen lg:flex lg:flex-col">
+                <div className="p-4 border-b border-t lg:border-t-0 border-gray-800 flex justify-between items-center flex-shrink-0">
                     <h2 className="font-bold text-lg">Next up</h2>
                      <button
                         onClick={() => router.back()}
@@ -136,8 +158,8 @@ function WatchPageContent() {
                         <span>Back</span>
                     </button>
                 </div>
-                <div className="max-h-[50vh] lg:max-h-full lg:overflow-y-auto">
-                    {playlistDetails.slice(currentIndex + 1).map(video => (
+                <div className="lg:flex-1 lg:overflow-y-auto">
+                    {orderedPlaylistVideos.slice(currentIndex + 1).map(video => (
                         <Link key={video.id} href={`/watch?v=${video.id}&playlist=${playlist.join(',')}`} className="flex gap-3 p-3 hover:bg-gray-800 transition-colors">
                             <div className="relative aspect-video w-32 flex-shrink-0">
                                 <Image src={video.thumbnailUrl} alt={video.title} fill className="object-cover rounded-md" />
@@ -146,6 +168,7 @@ function WatchPageContent() {
                             <div className="flex-1">
                                 <h3 className="text-sm font-semibold line-clamp-2">{video.title}</h3>
                                 <p className="text-xs text-gray-400 mt-1">{video.channelName}</p>
+                                <p className="text-xs text-gray-400">{video.views}</p>
                             </div>
                         </Link>
                     ))}

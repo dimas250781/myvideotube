@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
 
-// This is a simplified copy of the main API route logic, but only for fetching video details.
-
 const apiKeys = [
   process.env.YOUTUBE_API_KEY_1,
   process.env.YOUTUBE_API_KEY_2,
@@ -16,14 +14,14 @@ let currentKeyIndex = 0;
 
 const formatDuration = (isoDuration: string) => {
   const match = isoDuration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-  if (!match) return '00:00';
+  if (!match) return '0:00'; // Return a valid format
   const hours = parseInt(match[1] || '0');
   const minutes = parseInt(match[2] || '0');
   const seconds = parseInt(match[3] || '0');
   const h = hours > 0 ? `${hours}:` : '';
-  const m = hours > 0 || minutes > 0 ? `${minutes.toString().padStart(2, '0')}:` : '00:';
+  const m = hours > 0 || minutes > 0 ? `${minutes.toString().padStart(2, '0')}:` : '0:';
   const s = seconds.toString().padStart(2, '0');
-  return `${h}${m}${s}`;
+  return `${h}${m}${s}`.replace(/^0:/, ''); // Fix for 0:MM:SS format
 };
 
 const formatViews = (views: string) => {
@@ -74,7 +72,9 @@ async function fetchVideoDetails(videoIds: string) {
     let channelAvatars = new Map();
     if(channelIds) {
         const channelsData = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelIds}`);
-        channelAvatars = new Map(channelsData.items.map((channel: any) => [channel.id, channel.snippet.thumbnails.default.url]));
+        if(channelsData.items) {
+          channelAvatars = new Map(channelsData.items.map((channel: any) => [channel.id, channel.snippet.thumbnails.default.url]));
+        }
     }
     
     return detailsData.items.map((item: any) => ({
