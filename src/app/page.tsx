@@ -9,14 +9,25 @@ const categories = ["Beranda", "Musik", "Karaoke", "Berita", "Live", "Kuliner", 
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState('Beranda');
+  const [searchQuery, setSearchQuery] = useState('');
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState('Beranda');
 
   useEffect(() => {
     const fetchVideos = async () => {
       setLoading(true);
+      let url = '/api/youtube?';
+      if (searchQuery) {
+        url += `search_query=${encodeURIComponent(searchQuery)}`;
+        setTitle(`Hasil pencarian untuk "${searchQuery}"`);
+      } else {
+        url += `category=${encodeURIComponent(activeCategory)}`;
+        setTitle(activeCategory === 'Beranda' ? 'Video Populer' : activeCategory);
+      }
+
       try {
-        const response = await fetch(`/api/youtube?category=${activeCategory}`);
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error('Failed to fetch videos');
         }
@@ -24,31 +35,37 @@ export default function Home() {
         setVideos(data);
       } catch (error) {
         console.error(error);
-        // Optionally, show an error message to the user
+        setVideos([]); // Clear videos on error
       } finally {
         setLoading(false);
       }
     };
 
     fetchVideos();
-  }, [activeCategory]);
+  }, [activeCategory, searchQuery]);
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setActiveCategory(''); // Reset category when searching
+  };
+
+  const selectCategory = (category: string) => {
+    setSearchQuery(''); // Reset search when a category is selected
+    setActiveCategory(category);
+  }
 
   return (
-    <div className="bg-black min-h-screen">
-      {/* Header */}
-      <Header />
+    <div className="flex flex-col h-screen bg-black">
+      <Header onSearch={handleSearch} />
       
-      {/* Category Nav */}
-      <div className="p-4 md:p-6 pb-4">
-        {/* Category Buttons */}
+      <div className="sticky top-[73px] bg-black z-10 py-4 px-4 md:px-6">
         <div className="flex space-x-4 overflow-x-auto pb-2">
           {categories.map((category) => (
             <button 
               key={category}
-              onClick={() => setActiveCategory(category)}
+              onClick={() => selectCategory(category)}
               className={`px-4 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${
-                activeCategory === category
+                activeCategory === category && !searchQuery
                   ? 'bg-white text-black'
                   : 'bg-gray-800 hover:bg-gray-700 text-white'
               }`}
@@ -59,9 +76,8 @@ export default function Home() {
         </div>
       </div>
       
-      {/* Main Content Area */}
-      <main className="p-4 md:p-6 pt-0">
-        {/* Video Grid */}
+      <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <h2 className="text-xl md:text-2xl font-bold text-white mb-6">{title}</h2>
         {loading ? (
           <div className="text-center text-white">Loading videos...</div>
         ) : (

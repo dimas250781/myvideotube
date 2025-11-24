@@ -85,6 +85,7 @@ async function fetchWithRetry(url: string) {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category') || 'Beranda';
+  const searchQuery = searchParams.get('search_query');
   
   if (apiKeys.length === 0) {
     return NextResponse.json({ message: 'YouTube API key not configured' }, { status: 500 });
@@ -95,14 +96,16 @@ export async function GET(request: Request) {
     const regionCode = 'ID'; // Indonesia
     const maxResults = 20;
 
-    if (category === 'Beranda') {
+    if (searchQuery) {
+        queryParams = `part=snippet&q=${encodeURIComponent(searchQuery)}&regionCode=${regionCode}&maxResults=${maxResults}&type=video`;
+    } else if (category === 'Beranda') {
       queryParams = `part=snippet,contentDetails,statistics&chart=mostPopular&regionCode=${regionCode}&maxResults=${maxResults}&videoCategoryId=0`;
     } else if (YOUTUBE_VIDEO_CATEGORIES[category]) {
        queryParams = `part=snippet,contentDetails,statistics&chart=mostPopular&regionCode=${regionCode}&maxResults=${maxResults}&videoCategoryId=${YOUTUBE_VIDEO_CATEGORIES[category]}`;
     } else {
       // For categories not in the map, use search
-      const searchQuery = encodeURIComponent(`${category} indonesia`);
-      queryParams = `part=snippet&q=${searchQuery}&regionCode=${regionCode}&maxResults=${maxResults}&type=video`;
+      const categorySearchQuery = encodeURIComponent(`${category} indonesia`);
+      queryParams = `part=snippet&q=${categorySearchQuery}&regionCode=${regionCode}&maxResults=${maxResults}&type=video`;
     }
 
     const itemsData = queryParams.includes('&q=') 
@@ -110,6 +113,10 @@ export async function GET(request: Request) {
       : await fetchWithRetry(`https://www.googleapis.com/youtube/v3/videos?${queryParams}`);
     
     const items = itemsData.items;
+
+    if (!items || items.length === 0) {
+        return NextResponse.json([]);
+    }
     
     // If we did a search, we need to fetch video details separately to get duration and stats
     let finalItems = items;
@@ -143,7 +150,7 @@ export async function GET(request: Request) {
       description: item.snippet.description,
       category: category,
       channelAvatarUrl: channelAvatars.get(item.snippet.channelId) || '',
-    }));
+    })).filter(video => video.id); // Filter out any items that didn't merge correctly
 
     return NextResponse.json(formattedVideos);
   } catch (error: any) {
