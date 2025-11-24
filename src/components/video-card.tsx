@@ -37,12 +37,12 @@ export function VideoCard({ video }: VideoCardProps) {
       </Link>
       <div className="flex gap-3 pt-3">
         {channel && channelAvatar && (
-          <Link href={`/channel/${channel.id}`} className="flex-shrink-0 mt-1">
-            <Avatar className="h-9 w-9">
-              <AvatarImage src={channelAvatar.imageUrl} alt={channel.name} data-ai-hint={channelAvatar.imageHint} />
-              <AvatarFallback>{channel.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-          </Link>
+            <Link href={`/channel/${channel.id}`} className="flex-shrink-0 mt-1">
+                <Avatar className="h-9 w-9">
+                    <AvatarImage src={channelAvatar.imageUrl} alt={channel.name} data-ai-hint={channelAvatar.imageHint} />
+                    <AvatarFallback>{channel.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+            </Link>
         )}
         <div className="flex flex-col min-w-0">
           <Link href={`/watch/${video.id}`}>

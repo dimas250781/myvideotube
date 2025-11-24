@@ -8,7 +8,6 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Button } from './ui/button';
-import { usePathname } from 'next/navigation';
 
 const categories = [
   'Beranda',
@@ -24,10 +23,12 @@ const categories = [
   'Hobby',
 ];
 
-export function CategoryNav() {
-  const pathname = usePathname();
-  const activeCategory = pathname === '/' ? 'Beranda' : ''; // Simple logic for now
+type CategoryNavProps = {
+  activeCategory: string;
+  setActiveCategory: (category: string) => void;
+};
 
+export function CategoryNav({ activeCategory, setActiveCategory }: CategoryNavProps) {
   return (
     <nav className="sticky top-16 z-10 border-b bg-background px-4 py-2">
       <div className="relative">
@@ -45,6 +46,7 @@ export function CategoryNav() {
                   variant={activeCategory === category ? 'default' : 'secondary'}
                   size="sm"
                   className="h-8"
+                  onClick={() => setActiveCategory(category)}
                 >
                   {category}
                 </Button>

@@ -8,6 +8,7 @@ export type Video = {
   views: string;
   uploadedAt: string;
   description: string;
+  category: string;
 };
 
 export type Channel = {
@@ -35,7 +36,8 @@ export const videos: Video[] = [
     channelId: 'fireship',
     views: '250K views',
     uploadedAt: '2 weeks ago',
-    description: 'Learn the fundamentals of Next.js 15 and the App Router in this full tutorial for beginners. Get up and running with the worlds most popular React framework to build server-rendered applications.'
+    description: 'Learn the fundamentals of Next.js 15 and the App Router in this full tutorial for beginners. Get up and running with the worlds most popular React framework to build server-rendered applications.',
+    category: 'Film',
   },
   {
     id: 'react-in-100-seconds',
@@ -46,7 +48,8 @@ export const videos: Video[] = [
     channelId: 'fireship',
     views: '3.1M views',
     uploadedAt: '1 year ago',
-    description: 'React is a JavaScript library for building user interfaces. It enables developers to create reusable UI components and build complex, fast, and scalable single-page applications.'
+    description: 'React is a JavaScript library for building user interfaces. It enables developers to create reusable UI components and build complex, fast, and scalable single-page applications.',
+    category: 'Film',
   },
   {
     id: 'full-react-course-2024',
@@ -57,7 +60,8 @@ export const videos: Video[] = [
     channelId: 'freecodecamp',
     views: '8M views',
     uploadedAt: '5 months ago',
-    description: 'Become a master of React in this comprehensive course. You will learn all about components, hooks, context, reducers, and more.'
+    description: 'Become a master of React in this comprehensive course. You will learn all about components, hooks, context, reducers, and more.',
+    category: 'Film',
   },
   {
     id: 'css-for-js-devs',
@@ -68,7 +72,8 @@ export const videos: Video[] = [
     channelId: 'dev-ed',
     views: '750K views',
     uploadedAt: '1 year ago',
-    description: 'CSS can be tricky. This course is designed to make it intuitive and fun for JavaScript developers. Learn about flexbox, grid, animations, and more.'
+    description: 'CSS can be tricky. This course is designed to make it intuitive and fun for JavaScript developers. Learn about flexbox, grid, animations, and more.',
+    category: 'Film',
   },
   {
     id: 'the-perfect-api',
@@ -79,7 +84,8 @@ export const videos: Video[] = [
     channelId: 'web-dev-simplified',
     views: '1.2M views',
     uploadedAt: '9 months ago',
-    description: 'APIs are the backbone of modern web development. In this video, I will show you my process for designing and building robust, scalable, and easy-to-use APIs.'
+    description: 'APIs are the backbone of modern web development. In this video, I will show you my process for designing and building robust, scalable, and easy-to-use APIs.',
+    category: 'Film',
   },
   {
     id: 'ai-phone-review',
@@ -90,7 +96,8 @@ export const videos: Video[] = [
     channelId: 'mkbhd',
     views: '5.6M views',
     uploadedAt: '3 weeks ago',
-    description: 'A review of the latest AI-powered smartphone that promises to change everything. Does it live up to the hype? Let\'s find out.'
+    description: 'A review of the latest AI-powered smartphone that promises to change everything. Does it live up to the hype? Let\'s find out.',
+    category: 'Berita',
   },
   {
     id: 'genkit-tutorial',
@@ -101,7 +108,8 @@ export const videos: Video[] = [
     channelId: 'fireship',
     views: '98K views',
     uploadedAt: '1 day ago',
-    description: 'Firebase Genkit is a new open-source framework for building AI-powered apps. Let\'s build a RAG application with it.'
+    description: 'Firebase Genkit is a new open-source framework for building AI-powered apps. Let\'s build a RAG application with it.',
+    category: 'Film',
   },
   {
     id: 'advanced-typescript',
@@ -112,6 +120,7 @@ export const videos: Video[] = [
     channelId: 'freecodecamp',
     views: '2.1M views',
     uploadedAt: '11 months ago',
-    description: 'Take your TypeScript skills to the next level. Learn about generics, decorators, mapped types, and other advanced features.'
+    description: 'Take your TypeScript skills to the next level. Learn about generics, decorators, mapped types, and other advanced features.',
+    category: 'Film',
   },
 ];
