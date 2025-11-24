@@ -15,8 +15,6 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { MainSidebar } from './main-sidebar';
-import { SidebarTrigger } from './ui/sidebar';
 
 const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
 
@@ -24,7 +22,6 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between gap-2 md:gap-4 h-16 px-4 border-b bg-background">
       <div className="flex items-center gap-4">
-        <SidebarTrigger className="md:hidden"/>
         <Link href="/">
           <Logo />
         </Link>
@@ -48,7 +45,6 @@ export function AppHeader() {
         </Button>
         <UserMenu />
       </div>
-      <MainSidebar/>
     </header>
   );
 }

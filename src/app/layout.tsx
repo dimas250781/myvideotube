@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AppLayout } from '@/components/app-layout';
 import { Toaster } from '@/components/ui/toaster';
-import { SidebarProvider } from '@/components/ui/sidebar';
 
 export const metadata: Metadata = {
   title: 'MyVideoTube',
@@ -25,9 +24,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <SidebarProvider>
-          <AppLayout>{children}</AppLayout>
-        </SidebarProvider>
+        <AppLayout>{children}</AppLayout>
         <Toaster />
       </body>
     </html>
