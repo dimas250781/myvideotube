@@ -1,18 +1,38 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
 import VideoGrid from '@/components/video-grid'
-import { videos } from '@/lib/data';
+import type { Video } from '@/lib/data';
 
 const categories = ["Beranda", "Musik", "Karaoke", "Berita", "Live", "Kuliner", "Komedi", "Film", "Horor", "Traveling", "Hobby"];
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState('Beranda');
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredVideos = activeCategory === 'Beranda' 
-    ? videos 
-    : videos.filter(video => video.category === activeCategory);
+  useEffect(() => {
+    const fetchVideos = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/youtube?category=${activeCategory}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch videos');
+        }
+        const data = await response.json();
+        setVideos(data);
+      } catch (error) {
+        console.error(error);
+        // Optionally, show an error message to the user
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVideos();
+  }, [activeCategory]);
+
 
   return (
     <div className="bg-black min-h-screen">
@@ -42,7 +62,11 @@ export default function Home() {
       {/* Main Content Area */}
       <main className="p-4 md:p-6 pt-0">
         {/* Video Grid */}
-        <VideoGrid videos={filteredVideos} />
+        {loading ? (
+          <div className="text-center text-white">Loading videos...</div>
+        ) : (
+          <VideoGrid videos={videos} />
+        )}
       </main>
     </div>
   )
