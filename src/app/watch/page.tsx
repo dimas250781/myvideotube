@@ -82,19 +82,14 @@ function WatchPageContent() {
             return;
         }
 
-        // The correct way to request PiP for an iframe
-        if (videoElement !== document.pictureInPictureElement) {
-            try {
+        try {
+            if (videoElement !== document.pictureInPictureElement) {
                  await videoElement.requestPictureInPicture();
-            } catch(error) {
-                console.error("Failed to enter Picture-in-Picture mode:", error);
-            }
-        } else {
-            try {
+            } else {
                 await document.exitPictureInPicture();
-            } catch(error) {
-                 console.error("Failed to exit Picture-in-Picture mode:", error);
             }
+        } catch(error) {
+            console.error("Failed to toggle Picture-in-Picture mode:", error);
         }
     };
 
@@ -124,7 +119,7 @@ function WatchPageContent() {
             autoplay: 1,
             rel: 0,
             modestbranding: 1,
-            enablejsapi: 1, // Crucial for JS API interaction
+            enablejsapi: 1,
             origin: typeof window !== 'undefined' ? window.location.origin : '',
         },
     };
