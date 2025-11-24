@@ -19,8 +19,8 @@ export function VideoCard({ video }: VideoCardProps) {
   if (!thumbnail) return null;
 
   return (
-    <Link href={`/watch/${video.id}`} className="group">
-      <div className="flex flex-col gap-3">
+    <div className="group">
+      <Link href={`/watch/${video.id}`}>
         <div className="relative aspect-video overflow-hidden rounded-xl">
           <Image
             src={thumbnail.imageUrl}
@@ -34,29 +34,31 @@ export function VideoCard({ video }: VideoCardProps) {
             {video.duration}
           </div>
         </div>
-        <div className="flex gap-3">
-          {channel && channelAvatar && (
-            <Link href={`/channel/${channel.id}`} className="flex-shrink-0 mt-1">
-              <Avatar className="h-9 w-9">
-                <AvatarImage src={channelAvatar.imageUrl} alt={channel.name} data-ai-hint={channelAvatar.imageHint} />
-                <AvatarFallback>{channel.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-            </Link>
-          )}
-          <div className="flex flex-col min-w-0">
+      </Link>
+      <div className="flex gap-3 pt-3">
+        {channel && channelAvatar && (
+          <Link href={`/channel/${channel.id}`} className="flex-shrink-0 mt-1">
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={channelAvatar.imageUrl} alt={channel.name} data-ai-hint={channelAvatar.imageHint} />
+              <AvatarFallback>{channel.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+          </Link>
+        )}
+        <div className="flex flex-col min-w-0">
+          <Link href={`/watch/${video.id}`}>
             <h3 className="text-base font-medium leading-snug text-foreground truncate-2-lines group-hover:text-primary">
               {video.title}
             </h3>
-            <div className="text-sm text-muted-foreground mt-1">
-              <p className="truncate">{video.channelName}</p>
-              <p>
-                {video.views} &bull; {video.uploadedAt}
-              </p>
-            </div>
+          </Link>
+          <div className="text-sm text-muted-foreground mt-1">
+            <p className="truncate">{video.channelName}</p>
+            <p>
+              {video.views} &bull; {video.uploadedAt}
+            </p>
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
