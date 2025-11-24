@@ -24,8 +24,8 @@ export default function Header({ onSearch }: HeaderProps) {
   }
 
   return (
-    <header className="bg-black border-b border-gray-800 p-2 sm:p-4 sticky top-0 z-20">
-      <div className="flex items-center justify-between">
+    <header className="bg-black border-b border-gray-800 p-2 sm:p-4 sticky top-0 z-20 h-[57px] sm:h-[73px] flex items-center">
+      <div className="flex items-center justify-between w-full">
 
         {/* Left Section: Logo - shows on non-search view on mobile */}
         <div className={`flex items-center cursor-pointer transition-opacity duration-300 ${isSearchVisible ? 'opacity-0 pointer-events-none sm:opacity-100 sm:pointer-events-auto' : 'opacity-100'}`}>

@@ -7,13 +7,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface VideoCardProps {
   video: Video;
+  playlist: string;
 }
 
-export default function VideoCard({ video }: VideoCardProps) {
-
+export default function VideoCard({ video, playlist }: VideoCardProps) {
+  const watchUrl = `/watch?v=${video.id}&playlist=${playlist}`;
+  
   return (
     <div className="flex flex-col">
-      <Link href={`/watch?v=${video.id}`} className="group">
+      <Link href={watchUrl} className="group">
         <div className="relative aspect-video rounded-xl overflow-hidden">
             <Image
               src={video.thumbnailUrl}
@@ -37,7 +39,7 @@ export default function VideoCard({ video }: VideoCardProps) {
         )}
         <div className="flex-1">
           <h3 className="text-white font-semibold text-base leading-tight line-clamp-2">
-            <Link href={`/watch?v=${video.id}`}>{video.title}</Link>
+            <Link href={watchUrl}>{video.title}</Link>
           </h3>
           <p className="text-gray-400 text-sm mt-1">{video.channelName}</p>
           <div className="text-gray-400 text-sm">

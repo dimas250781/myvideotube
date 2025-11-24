@@ -54,17 +54,19 @@ export default function Home() {
     setActiveCategory(category);
   }
 
+  const videoIds = videos.map(v => v.id);
+
   return (
     <div className="flex flex-col h-screen bg-black">
       <Header onSearch={handleSearch} />
       
-      <div className="sticky top-[73px] bg-black z-10 py-4 px-4 md:px-6">
-        <div className="flex space-x-4 overflow-x-auto pb-2">
+      <div className="sticky top-[57px] sm:top-[73px] bg-black z-10 py-2 sm:py-4 px-4 md:px-6 border-b border-gray-800">
+        <div className="flex space-x-3 overflow-x-auto pb-2">
           {categories.map((category) => (
             <button 
               key={category}
               onClick={() => selectCategory(category)}
-              className={`px-4 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${
+              className={`px-3 py-1.5 text-sm md:px-4 md:py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeCategory === category && !searchQuery
                   ? 'bg-white text-black'
                   : 'bg-gray-800 hover:bg-gray-700 text-white'
@@ -81,7 +83,7 @@ export default function Home() {
         {loading ? (
           <div className="text-center text-white">Loading videos...</div>
         ) : (
-          <VideoGrid videos={videos} />
+          <VideoGrid videos={videos} videoIds={videoIds} />
         )}
       </main>
     </div>
