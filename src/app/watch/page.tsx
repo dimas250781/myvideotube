@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import YouTube, { YouTubeProps } from 'react-youtube';
 import type { Video } from '@/lib/data';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ function WatchPageContent() {
     const [playlistDetails, setPlaylistDetails] = useState<Video[]>([]);
     const [autoNext, setAutoNext] = useState(true);
     const [loading, setLoading] = useState(true);
-
+    
     const currentIndex = playlist.findIndex(id => id === videoId);
 
     useEffect(() => {
@@ -92,11 +92,9 @@ function WatchPageContent() {
         playerVars: {
             autoplay: 1,
             rel: 0,
-            modestbranding: 1,
+            controls: 1, // Ensure native controls are enabled
             enablejsapi: 1, 
             origin: typeof window !== 'undefined' ? window.location.origin : '',
-            // Mengaktifkan kontrol bawaan YouTube, termasuk Cast, PiP, dll.
-            controls: 1,
         },
     };
 
