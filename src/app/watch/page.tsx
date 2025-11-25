@@ -1,9 +1,9 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
+import { ArrowLeft, SkipBack, SkipForward, Cast } from 'lucide-react';
 import { Suspense, useState, useEffect, useRef } from 'react';
-import YouTube, { YouTubeProps } from 'react-youtube';
+import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube';
 import type { Video } from '@/lib/data';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -20,8 +20,10 @@ function WatchPageContent() {
 
     const [videoDetails, setVideoDetails] = useState<Video | null>(null);
     const [playlistDetails, setPlaylistDetails] = useState<Video[]>([]);
+    const [recommendedVideos, setRecommendedVideos] = useState<Video[]>([]);
     const [autoNext, setAutoNext] = useState(true);
     const [loading, setLoading] = useState(true);
+    const playerRef = useRef<YouTubePlayer | null>(null);
     
     const currentIndex = playlist.findIndex(id => id === videoId);
 
@@ -46,6 +48,16 @@ function WatchPageContent() {
                     const playlistData = await resPlaylist.json();
                     setPlaylistDetails(Array.isArray(playlistData) ? playlistData : (playlistData ? [playlistData] : []));
                 }
+
+                // Fetch recommended videos based on current video's category
+                if (videoData?.category) {
+                    const resRecommended = await fetch(`/api/youtube?category=${videoData.category}`);
+                    let recommendedData = await resRecommended.json();
+                    // Filter out the current video and limit to 10 recommendations
+                    recommendedData = recommendedData.filter((v: Video) => v.id !== videoId).slice(0, 10);
+                    setRecommendedVideos(recommendedData);
+                }
+
             } catch (error) {
                 console.error("Failed to fetch video details:", error);
             } finally {
@@ -65,8 +77,40 @@ function WatchPageContent() {
         if (currentIndex > -1 && currentIndex < playlist.length - 1) {
             const nextVideoId = playlist[currentIndex + 1];
             router.push(`/watch?v=${nextVideoId}&playlist=${playlist.join(',')}`);
+        } else if (recommendedVideos.length > 0) {
+            // If at the end of the playlist, play the first recommended video
+            const nextVideoId = recommendedVideos[0].id;
+            const newPlaylist = recommendedVideos.map(v => v.id).join(',');
+            router.push(`/watch?v=${nextVideoId}&playlist=${newPlaylist}`);
         }
     };
+
+    const playPrevVideo = () => {
+        if (currentIndex > 0) {
+            const prevVideoId = playlist[currentIndex - 1];
+            router.push(`/watch?v=${prevVideoId}&playlist=${playlist.join(',')}`);
+        }
+    };
+
+     const handleCast = async () => {
+        const videoElement = playerRef.current?.getInternalPlayer();
+        if (videoElement && typeof videoElement.requestPictureInPicture === 'function') { // Check for PiP support before using as a proxy for remote playback
+            try {
+                if ('remote' in videoElement) {
+                   // @ts-ignore - remote is an experimental API
+                   await videoElement.remote.prompt();
+                } else {
+                    alert('Remote Playback API is not supported in your browser.');
+                }
+            } catch (error) {
+                console.error('Casting failed:', error);
+                alert('Could not connect to a casting device.');
+            }
+        } else {
+            alert('Video player is not ready or casting is not supported.');
+        }
+    };
+
 
     if (loading) {
         return <div className="bg-black text-white h-screen flex items-center justify-center">Loading video...</div>
@@ -92,8 +136,8 @@ function WatchPageContent() {
         playerVars: {
             autoplay: 1,
             rel: 0,
-            controls: 1, // Ensure native controls are enabled
-            enablejsapi: 1, 
+            controls: 1,
+            enablejsapi: 1,
             origin: typeof window !== 'undefined' ? window.location.origin : '',
         },
     };
@@ -103,6 +147,10 @@ function WatchPageContent() {
     const orderedPlaylistVideos = playlist
       .map(id => videoDetailsMap.get(id))
       .filter((v): v is Video => !!v);
+    
+    const upNextVideos = orderedPlaylistVideos.length > currentIndex + 1 
+        ? orderedPlaylistVideos.slice(currentIndex + 1)
+        : recommendedVideos;
 
     return (
         <div className="bg-black text-white min-h-screen flex flex-col lg:flex-row">
@@ -112,6 +160,7 @@ function WatchPageContent() {
                     <YouTube 
                         videoId={videoId} 
                         opts={opts} 
+                        onReady={(event) => playerRef.current = event.target}
                         onEnd={handleVideoEnd}
                         className="w-full h-full aspect-video lg:aspect-auto" 
                         iframeClassName="w-full h-full" 
@@ -129,8 +178,18 @@ function WatchPageContent() {
 
                     <h1 className="text-xl md:text-2xl font-bold mb-2">{videoDetails?.title}</h1>
                     <div className="flex flex-wrap items-center justify-between text-gray-400 gap-4">
-                        <p>{videoDetails?.channelName}</p>
+                        <div className="flex items-center gap-4">
+                           <button onClick={playPrevVideo} disabled={currentIndex <= 0} className="disabled:opacity-50 disabled:cursor-not-allowed p-2 hover:bg-gray-800 rounded-full transition-colors">
+                             <SkipBack size={20} />
+                           </button>
+                           <button onClick={playNextVideo} disabled={currentIndex >= playlist.length - 1 && recommendedVideos.length === 0} className="disabled:opacity-50 disabled:cursor-not-allowed p-2 hover:bg-gray-800 rounded-full transition-colors">
+                             <SkipForward size={20} />
+                           </button>
+                        </div>
                         <div className="flex items-center space-x-4">
+                           <button onClick={handleCast} className="flex items-center space-x-2 p-2 hover:bg-gray-800 rounded-full transition-colors" title="Cast to device">
+                               <Cast size={20} />
+                           </button>
                            <div className="flex items-center space-x-2">
                                <Label htmlFor="auto-next" className="text-sm">Auto-Next</Label>
                                <Switch
@@ -165,8 +224,7 @@ function WatchPageContent() {
                     </button>
                 </div>
                 <div className="lg:flex-1 lg:overflow-y-auto">
-                    {/* Show all upcoming videos in the playlist */}
-                    {orderedPlaylistVideos.slice(currentIndex + 1).map(video => (
+                    {upNextVideos.map(video => (
                         <Link key={video.id} href={`/watch?v=${video.id}&playlist=${playlist.join(',')}`} className="flex gap-3 p-3 hover:bg-gray-800 transition-colors">
                             <div className="relative aspect-video w-32 flex-shrink-0">
                                 <Image src={video.thumbnailUrl} alt={video.title} fill className="object-cover rounded-md" />
