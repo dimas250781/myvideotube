@@ -32,9 +32,9 @@ export default function Header({ onSearch }: HeaderProps) {
           <div className="w-8 h-8 bg-red-600 rounded-full mr-2 flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-sm">M</span>
           </div>
-          <div className="hidden sm:flex sm:flex-col">
-            <h1 className="text-xl font-bold text-white">MyVideoTube</h1>
-            <p className="text-xs text-gray-400">Created By. DimzM01</p>
+          <div className="flex flex-col">
+            <h1 className="text-base sm:text-xl font-bold text-white whitespace-nowrap">MyVideoTube</h1>
+            <p className="text-[10px] sm:text-xs text-gray-400">Created By. DimzM01</p>
           </div>
         </div>
 
