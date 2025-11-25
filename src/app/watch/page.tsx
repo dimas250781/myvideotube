@@ -53,9 +53,12 @@ function WatchPageContent() {
                 if (videoData?.category) {
                     const resRecommended = await fetch(`/api/youtube?category=${videoData.category}`);
                     let recommendedData = await resRecommended.json();
-                    // Filter out the current video and limit to 10 recommendations
-                    recommendedData = recommendedData.filter((v: Video) => v.id !== videoId).slice(0, 10);
-                    setRecommendedVideos(recommendedData);
+                    
+                    if(recommendedData && Array.isArray(recommendedData.videos)) {
+                        // Filter out the current video and limit to 10 recommendations
+                        const filteredRecommended = recommendedData.videos.filter((v: Video) => v.id !== videoId).slice(0, 10);
+                        setRecommendedVideos(filteredRecommended);
+                    }
                 }
 
             } catch (error) {
@@ -94,20 +97,15 @@ function WatchPageContent() {
 
      const handleCast = async () => {
         const videoElement = playerRef.current?.getInternalPlayer();
-        if (videoElement && typeof videoElement.requestPictureInPicture === 'function') { // Check for PiP support before using as a proxy for remote playback
+        if (videoElement && typeof (videoElement as any).remote?.prompt === 'function') {
             try {
-                if ('remote' in videoElement) {
-                   // @ts-ignore - remote is an experimental API
-                   await videoElement.remote.prompt();
-                } else {
-                    alert('Remote Playback API is not supported in your browser.');
-                }
+               await (videoElement as any).remote.prompt();
             } catch (error) {
                 console.error('Casting failed:', error);
                 alert('Could not connect to a casting device.');
             }
         } else {
-            alert('Video player is not ready or casting is not supported.');
+            alert('Video player is not ready or casting is not supported in your browser.');
         }
     };
 
@@ -155,8 +153,8 @@ function WatchPageContent() {
     return (
         <div className="bg-black text-white min-h-screen flex flex-col lg:flex-row">
             {/* Main Content */}
-            <div className="flex-1 flex flex-col lg:h-screen lg:overflow-y-hidden">
-                 <div className="w-full lg:h-3/5 xl:h-3/4 flex-shrink-0 bg-black relative">
+            <div className="flex-1 flex flex-col lg:h-screen lg:overflow-y-auto">
+                 <div className="w-full lg:flex-grow bg-black relative">
                     <YouTube 
                         videoId={videoId} 
                         opts={opts} 
@@ -167,7 +165,7 @@ function WatchPageContent() {
                     />
                 </div>
                 
-                <div className="p-4 lg:overflow-y-auto">
+                <div className="p-4 flex-shrink-0">
                      <button
                         onClick={() => router.push('/')}
                         className="flex lg:hidden items-center gap-2 text-white hover:text-gray-300 transition-colors mb-4"
@@ -200,48 +198,53 @@ function WatchPageContent() {
                            </div>
                         </div>
                     </div>
-                     <div className="flex items-center gap-2 mt-1">
-                        <p className="text-sm">{videoDetails?.views}</p>
-                        <span className="text-sm">•</span>
-                        <p className="text-sm">{videoDetails?.uploadedAt}</p>
-                    </div>
-                    <div className="mt-4 border-t border-gray-800 pt-4">
-                        <p className="text-sm whitespace-pre-wrap">{videoDetails?.description}</p>
-                    </div>
+                </div>
+                {/* Mobile view for Up Next */}
+                <div className="lg:hidden">
+                    <UpNextSidebar upNextVideos={upNextVideos} playlist={playlist} router={router} />
                 </div>
             </div>
 
-            {/* Playlist Sidebar */}
-            <div className="lg:w-96 lg:border-l lg:border-gray-800 flex-shrink-0 lg:h-screen lg:flex lg:flex-col">
-                <div className="p-4 border-b border-t lg:border-t-0 border-gray-800 flex justify-between items-center flex-shrink-0">
-                    <h2 className="font-bold text-lg">Berikutnya</h2>
-                     <button
-                        onClick={() => router.push('/')}
-                        className="hidden lg:flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
-                    >
-                        <ArrowLeft size={20} />
-                        <span>Kembali</span>
-                    </button>
-                </div>
-                <div className="lg:flex-1 lg:overflow-y-auto">
-                    {upNextVideos.map(video => (
-                        <Link key={video.id} href={`/watch?v=${video.id}&playlist=${playlist.join(',')}`} className="flex gap-3 p-3 hover:bg-gray-800 transition-colors">
-                            <div className="relative aspect-video w-32 flex-shrink-0">
-                                <Image src={video.thumbnailUrl} alt={video.title} fill className="object-cover rounded-md" />
-                                <span className="absolute bottom-1 right-1 bg-black bg-opacity-75 text-white text-xs px-1 py-0.5 rounded">{video.duration}</span>
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="text-sm font-semibold line-clamp-2">{video.title}</h3>
-                                <p className="text-xs text-gray-400 mt-1">{video.channelName}</p>
-                                <p className="text-xs text-gray-400">{video.views}</p>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
+            {/* Desktop Sidebar for Up Next */}
+            <div className="hidden lg:w-96 lg:border-l lg:border-gray-800 flex-shrink-0 lg:flex lg:flex-col lg:h-screen">
+                <UpNextSidebar upNextVideos={upNextVideos} playlist={playlist} router={router} />
             </div>
         </div>
     );
 }
+
+function UpNextSidebar({ upNextVideos, playlist, router }: { upNextVideos: Video[], playlist: string[], router: any }) {
+    return (
+        <>
+            <div className="p-4 border-b border-t lg:border-t-0 border-gray-800 flex justify-between items-center flex-shrink-0">
+                <h2 className="font-bold text-lg">Berikutnya</h2>
+                 <button
+                    onClick={() => router.push('/')}
+                    className="hidden lg:flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+                >
+                    <ArrowLeft size={20} />
+                    <span>Kembali</span>
+                </button>
+            </div>
+            <div className="lg:flex-1 lg:overflow-y-auto">
+                {upNextVideos.map(video => (
+                    <Link key={video.id} href={`/watch?v=${video.id}&playlist=${playlist.join(',')}`} className="flex gap-3 p-3 hover:bg-gray-800 transition-colors">
+                        <div className="relative aspect-video w-32 flex-shrink-0">
+                            <Image src={video.thumbnailUrl} alt={video.title} fill className="object-cover rounded-md" />
+                            <span className="absolute bottom-1 right-1 bg-black bg-opacity-75 text-white text-xs px-1 py-0.5 rounded">{video.duration}</span>
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-sm font-semibold line-clamp-2">{video.title}</h3>
+                            <p className="text-xs text-gray-400 mt-1">{video.channelName}</p>
+                            <p className="text-xs text-gray-400">{video.views}</p>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        </>
+    );
+}
+
 
 export default function WatchPage() {
     return (
