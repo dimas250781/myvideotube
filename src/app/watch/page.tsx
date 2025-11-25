@@ -95,21 +95,6 @@ function WatchPageContent() {
         }
     };
 
-     const handleCast = async () => {
-        const videoElement = playerRef.current?.getInternalPlayer();
-        if (videoElement && typeof (videoElement as any).remote?.prompt === 'function') {
-            try {
-               await (videoElement as any).remote.prompt();
-            } catch (error) {
-                console.error('Casting failed:', error);
-                alert('Could not connect to a casting device.');
-            }
-        } else {
-            alert('Video player is not ready or casting is not supported in your browser.');
-        }
-    };
-
-
     if (loading) {
         return <div className="bg-black text-white h-screen flex items-center justify-center">Loading video...</div>
     }
@@ -174,7 +159,7 @@ function WatchPageContent() {
                         <span>Kembali</span>
                     </button>
 
-                    <h1 className="text-xl md:text-2xl font-bold mb-2">{videoDetails?.title}</h1>
+                    <h1 className="text-xl md:text-2xl font-bold mb-2 line-clamp-2">{videoDetails?.title}</h1>
                     <div className="flex flex-wrap items-center justify-between text-gray-400 gap-4">
                         <div className="flex items-center gap-4">
                            <button onClick={playPrevVideo} disabled={currentIndex <= 0} className="disabled:opacity-50 disabled:cursor-not-allowed p-2 hover:bg-gray-800 rounded-full transition-colors">
@@ -185,9 +170,6 @@ function WatchPageContent() {
                            </button>
                         </div>
                         <div className="flex items-center space-x-4">
-                           <button onClick={handleCast} className="flex items-center space-x-2 p-2 hover:bg-gray-800 rounded-full transition-colors" title="Cast to device">
-                               <Cast size={20} />
-                           </button>
                            <div className="flex items-center space-x-2">
                                <Label htmlFor="auto-next" className="text-sm">Auto-Next</Label>
                                <Switch
