@@ -32,8 +32,7 @@ function ApiKeyStatusIndicator() {
       }
     };
     fetchStatus();
-    // Optional: Refresh status periodically
-    const interval = setInterval(fetchStatus, 30000); // every 30 seconds
+    const interval = setInterval(fetchStatus, 5000); // refresh every 5 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -47,6 +46,12 @@ function ApiKeyStatusIndicator() {
     }
   }
 
+  const getStatusLabel = (status: ApiKeyStatus['status'], usage: number) => {
+    if (status === 'quotaExceeded') return 'Quota Exceeded';
+    if (status === 'error') return 'Error';
+    return `Usage: ${usage}`;
+  };
+
   return (
      <div className="p-4 bg-gray-900 rounded-lg shadow-lg border border-gray-700">
       <h3 className="font-bold text-white mb-4 text-lg">API Key Status</h3>
@@ -58,7 +63,9 @@ function ApiKeyStatusIndicator() {
               <span className={`w-3 h-3 rounded-full ${getStatusColor(item.status)}`}></span>
               <span>{item.name}</span>
             </div>
-            <span className="text-sm font-mono px-2 py-1 bg-gray-800 rounded">{item.status}</span>
+            <span className={`text-sm font-mono px-2 py-1 rounded ${item.status === 'quotaExceeded' ? 'bg-red-900 text-red-200' : 'bg-gray-800'}`}>
+              {getStatusLabel(item.status, item.usage)}
+            </span>
           </div>
         )) : <p className="text-gray-400">Loading status...</p>}
       </div>
@@ -86,7 +93,7 @@ export default function Header({ onSearch }: HeaderProps) {
     <header className="bg-black border-b border-gray-800 p-2 sm:p-4 sticky top-0 z-20 h-[57px] sm:h-[73px] flex items-center">
       <div className="flex items-center justify-between w-full">
 
-        <div className={`flex items-center cursor-pointer`}>
+        <div className="flex items-center cursor-pointer" onClick={() => window.location.href='/'}>
           <div className="w-8 h-8 bg-red-600 rounded-full mr-2 flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-sm">M</span>
           </div>

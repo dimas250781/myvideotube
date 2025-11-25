@@ -3,6 +3,7 @@ export type ApiKeyStatus = {
   name: string;
   key: string;
   status: 'standby' | 'active' | 'quotaExceeded' | 'error';
+  usage: number; // New field to track usage
 };
 
 let currentKeyIndex = 0;
@@ -22,6 +23,7 @@ const initializeKeys = () => {
         name: `Key ${index + 1}`,
         key: key,
         status: 'standby',
+        usage: 0,
     }));
 };
 
@@ -36,14 +38,13 @@ export const getNextApiKey = (failedIndex: number | null = null) => {
       currentKeyIndex = (failedIndex + 1) % apiKeys.length;
     }
     
-    // Simple round-robin, but you could add more logic to skip errored keys
     const startingIndex = currentKeyIndex;
     do {
         const keyInfo = apiKeys[currentKeyIndex];
         if (keyInfo.status !== 'quotaExceeded') {
             const result = { apiKey: keyInfo.key, keyIndex: currentKeyIndex, keys: apiKeys };
-            // Move to next key for the subsequent request
-            // currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+            // Increment usage count for the key that is about to be used
+            apiKeys[currentKeyIndex].usage += 1;
             return result;
         }
         currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
@@ -55,13 +56,11 @@ export const getNextApiKey = (failedIndex: number | null = null) => {
 
 export const updateApiKeyStatus = (index: number, status: ApiKeyStatus['status']) => {
     if (apiKeys[index]) {
-        // Don't override a 'quotaExceeded' status unless it's a reset mechanism
         if (apiKeys[index].status === 'quotaExceeded' && status !== 'standby') {
           return;
         }
         apiKeys[index].status = status;
         
-        // When a key becomes active, others should be standby
         if (status === 'active') {
             apiKeys.forEach((key, i) => {
                 if (i !== index && apiKeys[i].status !== 'quotaExceeded' && apiKeys[i].status !== 'error') {
