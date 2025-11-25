@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft, SkipBack, SkipForward, Cast } from 'lucide-react';
+import { ArrowLeft, SkipBack, SkipForward } from 'lucide-react';
 import { Suspense, useState, useEffect, useRef } from 'react';
 import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube';
 import type { Video } from '@/lib/data';
@@ -77,8 +77,9 @@ function WatchPageContent() {
     };
     
     const playNextVideo = () => {
-        if (currentIndex > -1 && currentIndex < playlist.length - 1) {
-            const nextVideoId = playlist[currentIndex + 1];
+        const nextInPlaylistIndex = currentIndex + 1;
+        if (currentIndex > -1 && nextInPlaylistIndex < playlist.length) {
+            const nextVideoId = playlist[nextInPlaylistIndex];
             router.push(`/watch?v=${nextVideoId}&playlist=${playlist.join(',')}`);
         } else if (recommendedVideos.length > 0) {
             // If at the end of the playlist, play the first recommended video
@@ -93,6 +94,18 @@ function WatchPageContent() {
             const prevVideoId = playlist[currentIndex - 1];
             router.push(`/watch?v=${prevVideoId}&playlist=${playlist.join(',')}`);
         }
+    };
+    
+    const opts: YouTubeProps['opts'] = {
+        height: '100%',
+        width: '100%',
+        playerVars: {
+            autoplay: 1,
+            rel: 0,
+            controls: 1,
+            enablejsapi: 1,
+            origin: typeof window !== 'undefined' ? window.location.origin : '',
+        },
     };
 
     if (loading) {
@@ -112,19 +125,7 @@ function WatchPageContent() {
             </div>
         );
     }
-
-    const opts: YouTubeProps['opts'] = {
-        height: '100%',
-        width: '100%',
-        playerVars: {
-            autoplay: 1,
-            rel: 0,
-            controls: 1,
-            enablejsapi: 1,
-            origin: typeof window !== 'undefined' ? window.location.origin : '',
-        },
-    };
-
+    
     // Create a map for quick lookups to preserve order
     const videoDetailsMap = new Map(playlistDetails.map(v => [v.id, v]));
     const orderedPlaylistVideos = playlist
@@ -136,16 +137,16 @@ function WatchPageContent() {
         : recommendedVideos;
 
     return (
-        <div className="bg-black text-white min-h-screen flex flex-col lg:flex-row">
+        <div className="bg-black text-white min-h-screen flex flex-col md:flex-row">
             {/* Main Content */}
-            <div className="flex-1 flex flex-col lg:h-screen lg:overflow-y-auto">
-                 <div className="w-full lg:flex-grow bg-black relative">
+            <div className="flex-1 flex flex-col md:h-screen md:overflow-y-auto">
+                 <div className="w-full md:flex-grow bg-black relative">
                     <YouTube 
                         videoId={videoId} 
                         opts={opts} 
                         onReady={(event) => playerRef.current = event.target}
                         onEnd={handleVideoEnd}
-                        className="w-full h-full aspect-video lg:aspect-auto" 
+                        className="w-full h-full aspect-video md:aspect-auto" 
                         iframeClassName="w-full h-full" 
                     />
                 </div>
@@ -153,7 +154,7 @@ function WatchPageContent() {
                 <div className="p-4 flex-shrink-0">
                      <button
                         onClick={() => router.push('/')}
-                        className="flex lg:hidden items-center gap-2 text-white hover:text-gray-300 transition-colors mb-4"
+                        className="flex md:hidden items-center gap-2 text-white hover:text-gray-300 transition-colors mb-4"
                     >
                         <ArrowLeft size={20} />
                         <span>Kembali</span>
@@ -181,14 +182,14 @@ function WatchPageContent() {
                         </div>
                     </div>
                 </div>
-                {/* Mobile view for Up Next */}
-                <div className="lg:hidden">
+                {/* Mobile & Tablet view for Up Next */}
+                <div className="md:hidden">
                     <UpNextSidebar upNextVideos={upNextVideos} playlist={playlist} router={router} />
                 </div>
             </div>
 
             {/* Desktop Sidebar for Up Next */}
-            <div className="hidden lg:w-96 lg:border-l lg:border-gray-800 flex-shrink-0 lg:flex lg:flex-col lg:h-screen">
+            <div className="hidden md:w-96 md:border-l md:border-gray-800 flex-shrink-0 md:flex md:flex-col md:h-screen">
                 <UpNextSidebar upNextVideos={upNextVideos} playlist={playlist} router={router} />
             </div>
         </div>
@@ -198,17 +199,17 @@ function WatchPageContent() {
 function UpNextSidebar({ upNextVideos, playlist, router }: { upNextVideos: Video[], playlist: string[], router: any }) {
     return (
         <>
-            <div className="p-4 border-b border-t lg:border-t-0 border-gray-800 flex justify-between items-center flex-shrink-0">
+            <div className="p-4 border-b border-t md:border-t-0 border-gray-800 flex justify-between items-center flex-shrink-0">
                 <h2 className="font-bold text-lg">Berikutnya</h2>
                  <button
                     onClick={() => router.push('/')}
-                    className="hidden lg:flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+                    className="hidden md:flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
                 >
                     <ArrowLeft size={20} />
                     <span>Kembali</span>
                 </button>
             </div>
-            <div className="lg:flex-1 lg:overflow-y-auto">
+            <div className="md:flex-1 md:overflow-y-auto">
                 {upNextVideos.map(video => (
                     <Link key={video.id} href={`/watch?v=${video.id}&playlist=${playlist.join(',')}`} className="flex gap-3 p-3 hover:bg-gray-800 transition-colors">
                         <div className="relative aspect-video w-32 flex-shrink-0">
