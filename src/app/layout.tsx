@@ -15,6 +15,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#ff0000" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
       <body className="bg-black text-white">
         {children}
