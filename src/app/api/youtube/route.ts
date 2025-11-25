@@ -74,6 +74,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category') || 'Beranda';
   const searchQuery = searchParams.get('search_query');
+  const pageToken = searchParams.get('pageToken');
   
   const { keys } = getApiKeysStatus();
   if (keys.length === 0) {
@@ -107,6 +108,10 @@ export async function GET(request: Request) {
       const categorySearchQuery = encodeURIComponent(`${category} indonesia`);
       queryParams = `part=snippet&q=${categorySearchQuery}&regionCode=${regionCode}&maxResults=${maxResults}&type=video`;
     }
+    
+    if (pageToken) {
+        queryParams += `&pageToken=${pageToken}`;
+    }
 
     const itemsData = queryParams.includes('&q=') 
       ? await fetchWithRetry(`https://www.googleapis.com/youtube/v3/search?${queryParams}`) 
@@ -115,7 +120,7 @@ export async function GET(request: Request) {
     const items = itemsData.items;
 
     if (!items || items.length === 0) {
-        return NextResponse.json([]);
+        return NextResponse.json({ videos: [], nextPageToken: null });
     }
     
     let finalItems = items;
@@ -151,7 +156,7 @@ export async function GET(request: Request) {
       channelAvatarUrl: channelAvatars.get(item.snippet.channelId) || '',
     })).filter(video => video.id);
 
-    return NextResponse.json(formattedVideos);
+    return NextResponse.json({ videos: formattedVideos, nextPageToken: itemsData.nextPageToken || null });
   } catch (error: any) {
     console.error('Failed to fetch videos from YouTube:', error);
     return NextResponse.json({ message: error.message }, { status: 500 });
