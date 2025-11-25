@@ -1,28 +1,8 @@
 import { NextResponse } from 'next/server';
 import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
+import { getApiKeysStatus, updateApiKeyStatus, getNextApiKey } from '@/lib/api-key-manager';
 
-// Read individual API keys from environment variables and filter out any that are not set
-const apiKeys = [
-  process.env.YOUTUBE_API_KEY_1,
-  process.env.YOUTUBE_API_KEY_2,
-  process.env.YOUTUBE_API_KEY_3,
-  process.env.YOUTUBE_API_KEY_4,
-  process.env.YOUTUBE_API_KEY_5,
-].filter((key): key is string => !!key);
-
-let currentKeyIndex = 0;
-
-const YOUTUBE_VIDEO_CATEGORIES: { [key: string]: string } = {
-  Musik: '10',
-  Film: '1',
-  Berita: '25',
-  Komedi: '23',
-  Horor: '27', // Horror is part of Entertainment/Film, using search instead
-  Traveling: '19',
-  Hobby: '20', // Gaming
-  Kuliner: '26', // Howto & Style
-};
 
 // Function to format duration from ISO 8601 to HH:MM:SS
 const formatDuration = (isoDuration: string) => {
@@ -50,32 +30,40 @@ const formatViews = (views: string) => {
 
 
 async function fetchWithRetry(url: string) {
-  if (apiKeys.length === 0) {
-    throw new Error('No YouTube API keys configured.');
+  const { apiKey, keyIndex, keys } = getNextApiKey();
+  if (!apiKey) {
+    throw new Error('No YouTube API keys configured or all have failed.');
   }
 
-  for (let i = 0; i < apiKeys.length; i++) {
-    const apiKey = apiKeys[currentKeyIndex];
-    const fullUrl = `${url}&key=${apiKey}`;
+  for (let i = 0; i < keys.length; i++) {
+    const currentAttemptKey = keys[keyIndex];
+    const fullUrl = `${url}&key=${currentAttemptKey.key}`;
     
     try {
+      updateApiKeyStatus(keyIndex, 'active');
       const response = await fetch(fullUrl);
       const data = await response.json();
 
       if (data.error && data.error.errors[0].reason === 'quotaExceeded') {
-        console.warn(`Quota exceeded for key index ${currentKeyIndex}. Switching to the next key.`);
-        currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
-        continue; // Try next key
+        console.warn(`Quota exceeded for key index ${keyIndex}. Switching to the next key.`);
+        updateApiKeyStatus(keyIndex, 'quotaExceeded');
+        // Let the loop continue to the next key by calling getNextApiKey again internally or by rotating
+        const nextKeyInfo = getNextApiKey(keyIndex); 
+        // continue; // This will be handled by the next iteration of the API call logic
+        return fetchWithRetry(url); // Retry with the next key
       }
       if (!response.ok) {
+        updateApiKeyStatus(keyIndex, 'error');
         throw new Error(data.error?.message || 'YouTube API error');
       }
-
+      
+      updateApiKeyStatus(keyIndex, 'standby');
       return data;
 
     } catch (error) {
-       console.error(`Error with key index ${currentKeyIndex}:`, error);
-       currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+       console.error(`Error with key index ${keyIndex}:`, error);
+       updateApiKeyStatus(keyIndex, 'error');
+       const nextKeyInfo = getNextApiKey(keyIndex);
     }
   }
   throw new Error('All YouTube API keys have failed or exceeded their quota.');
@@ -87,11 +75,23 @@ export async function GET(request: Request) {
   const category = searchParams.get('category') || 'Beranda';
   const searchQuery = searchParams.get('search_query');
   
-  if (apiKeys.length === 0) {
+  const { keys } = getApiKeysStatus();
+  if (keys.length === 0) {
     return NextResponse.json({ message: 'YouTube API key not configured' }, { status: 500 });
   }
 
   try {
+    const YOUTUBE_VIDEO_CATEGORIES: { [key: string]: string } = {
+      Musik: '10',
+      Film: '1',
+      Berita: '25',
+      Komedi: '23',
+      Horor: '27', // Horror is part of Entertainment/Film, using search instead
+      Traveling: '19',
+      Hobby: '20', // Gaming
+      Kuliner: '26', // Howto & Style
+    };
+
     let queryParams: string;
     const regionCode = 'ID'; // Indonesia
     const maxResults = 20;
@@ -118,7 +118,6 @@ export async function GET(request: Request) {
         return NextResponse.json([]);
     }
     
-    // If we did a search, we need to fetch video details separately to get duration and stats
     let finalItems = items;
     if (queryParams.includes('&q=')) {
         const videoIds = items.map((item: any) => item.id.videoId).join(',');
@@ -150,7 +149,7 @@ export async function GET(request: Request) {
       description: item.snippet.description,
       category: category,
       channelAvatarUrl: channelAvatars.get(item.snippet.channelId) || '',
-    })).filter(video => video.id); // Filter out any items that didn't merge correctly
+    })).filter(video => video.id);
 
     return NextResponse.json(formattedVideos);
   } catch (error: any) {

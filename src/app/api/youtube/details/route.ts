@@ -1,16 +1,7 @@
 import { NextResponse } from 'next/server';
 import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
-
-const apiKeys = [
-  process.env.YOUTUBE_API_KEY_1,
-  process.env.YOUTUBE_API_KEY_2,
-  process.env.YOUTUBE_API_KEY_3,
-  process.env.YOUTUBE_API_KEY_4,
-  process.env.YOUTUBE_API_KEY_5,
-].filter((key): key is string => !!key);
-
-let currentKeyIndex = 0;
+import { getNextApiKey, updateApiKeyStatus } from '@/lib/api-key-manager';
 
 const formatDuration = (isoDuration: string) => {
   const match = isoDuration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
@@ -31,28 +22,40 @@ const formatViews = (views: string) => {
     return `${num} views`;
 };
 
-async function fetchWithRetry(url: string) {
-  if (apiKeys.length === 0) throw new Error('No YouTube API keys configured.');
+async function fetchWithRetry(url: string): Promise<any> {
+  let attempts = 0;
+  const { keys } = getNextApiKey();
+  const maxAttempts = keys.length;
 
-  for (let i = 0; i < apiKeys.length; i++) {
-    const apiKey = apiKeys[currentKeyIndex];
+  while(attempts < maxAttempts) {
+    const { apiKey, keyIndex } = getNextApiKey();
+    if (!apiKey) throw new Error('All API keys have failed or have quota issues.');
+
     const fullUrl = `${url}&key=${apiKey}`;
-    
     try {
+      updateApiKeyStatus(keyIndex, 'active');
       const response = await fetch(fullUrl);
       const data = await response.json();
 
       if (data.error && data.error.errors[0].reason === 'quotaExceeded') {
-        console.warn(`Quota exceeded for key index ${currentKeyIndex}. Switching to the next key.`);
-        currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+        console.warn(`Quota exceeded for key index ${keyIndex}. Switching to the next key.`);
+        updateApiKeyStatus(keyIndex, 'quotaExceeded');
+        attempts++;
         continue;
       }
-      if (!response.ok) throw new Error(data.error?.message || 'YouTube API error');
 
+      if (!response.ok) {
+        updateApiKeyStatus(keyIndex, 'error');
+        throw new Error(data.error?.message || 'YouTube API error');
+      }
+
+      updateApiKeyStatus(keyIndex, 'standby');
       return data;
+
     } catch (error) {
-       console.error(`Error with key index ${currentKeyIndex}:`, error);
-       currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+       console.error(`Error with key index ${keyIndex}:`, error);
+       updateApiKeyStatus(keyIndex, 'error');
+       attempts++;
     }
   }
   throw new Error('All YouTube API keys have failed or exceeded their quota.');
@@ -102,7 +105,6 @@ export async function GET(request: Request) {
 
   try {
     const videoDetails = await fetchVideoDetails(videoIds);
-    // If only one ID was requested, return a single object instead of an array
     if (videoIds.split(',').length === 1) {
         return NextResponse.json(videoDetails[0] || null);
     }
