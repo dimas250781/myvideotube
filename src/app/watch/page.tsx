@@ -49,16 +49,15 @@ function WatchPageContent() {
                     setPlaylistDetails(Array.isArray(playlistData) ? playlistData : (playlistData ? [playlistData] : []));
                 }
 
-                // Fetch recommended videos based on current video's category
-                if (videoData?.category) {
-                    const resRecommended = await fetch(`/api/youtube?category=${videoData.category}`);
-                    let recommendedData = await resRecommended.json();
-                    
-                    if(recommendedData && Array.isArray(recommendedData.videos)) {
-                        // Filter out the current video and limit to 10 recommendations
-                        const filteredRecommended = recommendedData.videos.filter((v: Video) => v.id !== videoId).slice(0, 10);
-                        setRecommendedVideos(filteredRecommended);
-                    }
+                // Fetch recommended videos based on current video's category or search popular if no category
+                const categoryToFetch = videoData?.category || 'Beranda';
+                const resRecommended = await fetch(`/api/youtube?category=${categoryToFetch}`);
+                let recommendedData = await resRecommended.json();
+                
+                if(recommendedData && Array.isArray(recommendedData.videos)) {
+                    // Filter out the current video and limit to 10 recommendations
+                    const filteredRecommended = recommendedData.videos.filter((v: Video) => v.id !== videoId).slice(0, 10);
+                    setRecommendedVideos(filteredRecommended);
                 }
 
             } catch (error) {
@@ -102,7 +101,7 @@ function WatchPageContent() {
         playerVars: {
             autoplay: 1,
             rel: 0,
-            controls: 1,
+            controls: 1, // Ensure full controls are enabled
             enablejsapi: 1,
             origin: typeof window !== 'undefined' ? window.location.origin : '',
         },
@@ -126,7 +125,6 @@ function WatchPageContent() {
         );
     }
     
-    // Create a map for quick lookups to preserve order
     const videoDetailsMap = new Map(playlistDetails.map(v => [v.id, v]));
     const orderedPlaylistVideos = playlist
       .map(id => videoDetailsMap.get(id))
@@ -139,7 +137,7 @@ function WatchPageContent() {
     return (
         <div className="bg-black text-white min-h-screen flex flex-col md:flex-row">
             {/* Main Content */}
-            <div className="flex-1 flex flex-col md:h-screen md:overflow-y-auto">
+            <div className="flex-1 flex flex-col md:h-screen md:overflow-y-hidden">
                  <div className="w-full md:flex-grow bg-black relative">
                     <YouTube 
                         videoId={videoId} 
@@ -151,7 +149,7 @@ function WatchPageContent() {
                     />
                 </div>
                 
-                <div className="p-4 flex-shrink-0">
+                <div className="p-4 flex-shrink-0 md:overflow-y-auto">
                      <button
                         onClick={() => router.push('/')}
                         className="flex md:hidden items-center gap-2 text-white hover:text-gray-300 transition-colors mb-4"
@@ -166,7 +164,7 @@ function WatchPageContent() {
                            <button onClick={playPrevVideo} disabled={currentIndex <= 0} className="disabled:opacity-50 disabled:cursor-not-allowed p-2 hover:bg-gray-800 rounded-full transition-colors">
                              <SkipBack size={20} />
                            </button>
-                           <button onClick={playNextVideo} disabled={currentIndex >= playlist.length - 1 && recommendedVideos.length === 0} className="disabled:opacity-50 disabled:cursor-not-allowed p-2 hover:bg-gray-800 rounded-full transition-colors">
+                           <button onClick={playNextVideo} disabled={upNextVideos.length === 0} className="disabled:opacity-50 disabled:cursor-not-allowed p-2 hover:bg-gray-800 rounded-full transition-colors">
                              <SkipForward size={20} />
                            </button>
                         </div>
@@ -181,10 +179,10 @@ function WatchPageContent() {
                            </div>
                         </div>
                     </div>
-                </div>
-                {/* Mobile & Tablet view for Up Next */}
-                <div className="md:hidden">
-                    <UpNextSidebar upNextVideos={upNextVideos} playlist={playlist} router={router} />
+                    {/* Mobile & Tablet view for Up Next */}
+                    <div className="md:hidden mt-4">
+                        <UpNextSidebar upNextVideos={upNextVideos} playlist={playlist} router={router} />
+                    </div>
                 </div>
             </div>
 
@@ -197,6 +195,9 @@ function WatchPageContent() {
 }
 
 function UpNextSidebar({ upNextVideos, playlist, router }: { upNextVideos: Video[], playlist: string[], router: any }) {
+    // Generate a new playlist for the recommended videos
+    const newPlaylist = upNextVideos.map(v => v.id).join(',');
+
     return (
         <>
             <div className="p-4 border-b border-t md:border-t-0 border-gray-800 flex justify-between items-center flex-shrink-0">
@@ -211,7 +212,7 @@ function UpNextSidebar({ upNextVideos, playlist, router }: { upNextVideos: Video
             </div>
             <div className="md:flex-1 md:overflow-y-auto">
                 {upNextVideos.map(video => (
-                    <Link key={video.id} href={`/watch?v=${video.id}&playlist=${playlist.join(',')}`} className="flex gap-3 p-3 hover:bg-gray-800 transition-colors">
+                    <Link key={video.id} href={`/watch?v=${video.id}&playlist=${newPlaylist}`} className="flex gap-3 p-3 hover:bg-gray-800 transition-colors">
                         <div className="relative aspect-video w-32 flex-shrink-0">
                             <Image src={video.thumbnailUrl} alt={video.title} fill className="object-cover rounded-md" />
                             <span className="absolute bottom-1 right-1 bg-black bg-opacity-75 text-white text-xs px-1 py-0.5 rounded">{video.duration}</span>
