@@ -1,8 +1,8 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
-import { Suspense, useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Maximize, Minimize } from 'lucide-react';
+import { Suspense, useState, useEffect } from 'react';
 import YouTube, { YouTubeProps } from 'react-youtube';
 import type { Video } from '@/lib/data';
 import Link from 'next/link';
@@ -95,6 +95,8 @@ function WatchPageContent() {
             modestbranding: 1,
             enablejsapi: 1, 
             origin: typeof window !== 'undefined' ? window.location.origin : '',
+            // Mengaktifkan kontrol bawaan YouTube, termasuk Cast, PiP, dll.
+            controls: 1,
         },
     };
 
