@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react";
-import { Search, Video, Bell, Menu, X } from 'lucide-react';
+import { Search, Cast, Bell, X } from 'lucide-react';
 
 interface HeaderProps {
     onSearch: (query: string) => void;
@@ -27,8 +27,8 @@ export default function Header({ onSearch }: HeaderProps) {
     <header className="bg-black border-b border-gray-800 p-2 sm:p-4 sticky top-0 z-20 h-[57px] sm:h-[73px] flex items-center">
       <div className="flex items-center justify-between w-full">
 
-        {/* Left Section: Logo - shows on non-search view on mobile */}
-        <div className={`flex items-center cursor-pointer transition-opacity duration-300 ${isSearchVisible ? 'opacity-0 pointer-events-none sm:opacity-100 sm:pointer-events-auto' : 'opacity-100'}`}>
+        {/* Left Section: Logo - now always visible */}
+        <div className={`flex items-center cursor-pointer`}>
           <div className="w-8 h-8 bg-red-600 rounded-full mr-2 flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-sm">M</span>
           </div>
@@ -59,8 +59,8 @@ export default function Header({ onSearch }: HeaderProps) {
            <button onClick={toggleSearch} className="sm:hidden text-white p-2 rounded-full hover:bg-gray-800 transition-colors" aria-label="Search">
              {isSearchVisible ? <X className="w-5 h-5"/> : <Search className="w-5 h-5"/>}
            </button>
-          <button className="text-white p-2 rounded-full hover:bg-gray-800 transition-colors" aria-label="Upload">
-            <Video className="w-5 h-5 sm:w-6 sm:h-6" />
+          <button className="text-white p-2 rounded-full hover:bg-gray-800 transition-colors" aria-label="Cast to TV">
+            <Cast className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           <button className="text-white p-2 rounded-full hover:bg-gray-800 transition-colors" aria-label="Notifications">
             <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
